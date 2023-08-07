@@ -3,14 +3,13 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import User from '../../db/models/user.js'
-import user from '../../db/models/user.js'
 
 export default function () {
   // serialize user to cookie
   passport.serializeUser((user, done) => {
     done(null, user)
   })
-  // deserialize user to cookie
+  // serialize user to cookie
   passport.deserializeUser(async (email, done) => {
     try {
       const usr = await User.findOne({ email: email }, { userPassword: 0 })
