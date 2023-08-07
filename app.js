@@ -1,10 +1,25 @@
 /** @format */
+
+// env mode
+process.env.NODE_ENV =
+  process.env.NODE_ENV &&
+  process.env.NODE_ENV.trim().toLowerCase() == 'production'
+    ? 'production'
+    : 'development'
+
+// default path
+import path from 'path'
 import * as url from 'url'
+// http
 import http from 'http'
 import createError from 'http-errors'
 import express from 'express'
-import path from 'path'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import { corsOptions } from './api/cors.js'
+import session from 'express-session'
+import { sessionOptions } from './api/session.js'
+// loggers
 import loggerWeb from 'morgan'
 import logger from './logger/index.js'
 
@@ -17,12 +32,19 @@ global.__dirname = url.fileURLToPath(new URL('.', import.meta.url))
 const app = express()
 const server = http.createServer(app)
 
+// set middleware
 app.use(loggerWeb('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static('./public'))
+app.use(session(sessionOptions))
 
+// set in development mode
+if (process.env.NODE_ENV == 'development') {
+  // cors
+  app.use(cors(corsOptions))
+}
 app.use('/', indexRouter)
 app.use('/users', usersRouter)
 
