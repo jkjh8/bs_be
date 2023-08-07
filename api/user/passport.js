@@ -30,8 +30,8 @@ export default function () {
           if (!usr)
             return done(null, false, { message: '사용자를 찾을 수 없습니다.' })
           // login success
-          if (await user.verifyPassword(password)) {
-            delete user['userPassword']
+          if (await usr.verifyPassword(password)) {
+            delete usr['userPassword']
             return done(null, usr, { message: '로그인 성공' })
           }
           // password not match
