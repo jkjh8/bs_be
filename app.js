@@ -21,7 +21,7 @@ import session from 'express-session'
 import { sessionOptions } from './api/session.js'
 // loggers
 import loggerWeb from 'morgan'
-import logger from './logger/index.js'
+import logger from './api/logger/index.js'
 
 import indexRouter from './routes/index.js'
 import usersRouter from './routes/users.js'
