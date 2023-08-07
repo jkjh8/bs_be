@@ -5,7 +5,8 @@ import createError from 'http-errors'
 import express from 'express'
 import path from 'path'
 import cookieParser from 'cookie-parser'
-import logger from 'morgan'
+import loggerWeb from 'morgan'
+import logger from './logger/index.js'
 
 import indexRouter from './routes/index.js'
 import usersRouter from './routes/users.js'
@@ -16,7 +17,7 @@ global.__dirname = url.fileURLToPath(new URL('.', import.meta.url))
 const app = express()
 const server = http.createServer(app)
 
-app.use(logger('dev'))
+app.use(loggerWeb('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
@@ -44,7 +45,7 @@ app.use(function (err, req, res, next) {
 // app start server
 server.listen(3000, () => {
   const addr = server.address()
-  console.log('Web Server Listenning to ' + addr.port)
+  logger.info('Web Server Listenning to ' + addr.port)
 })
 
 export default app
