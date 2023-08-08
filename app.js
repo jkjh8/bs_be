@@ -1,38 +1,28 @@
 /** @format */
 
-// env mode
-process.env.NODE_ENV =
-  process.env.NODE_ENV &&
-  process.env.NODE_ENV.trim().toLowerCase() == 'production'
-    ? 'production'
-    : 'development'
-
-// default path
-import path from 'path'
-import * as url from 'url'
 // http
-import http from 'http'
-import createError from 'http-errors'
-import express from 'express'
-import cookieParser from 'cookie-parser'
-import cors from 'cors'
-import { corsOptions } from './api/cors.js'
-import session from 'express-session'
-import { sessionOptions } from './api/session.js'
+const http = require('http')
+const { Server } = require('socket.io')
+const createError = require('http-errors')
+const express = require('express')
+const cookieParser = require('cookie-parser')
+const cors = require('cors')
+const { corsOptions } = require('./api/cors.js')
+const session = require('express-session')
+const { sessionOptions } = require('./api/session.js')
 // loggers
-import loggerWeb from 'morgan'
-import logger from './api/logger/index.js'
-
-import indexRouter from './routes/index.js'
-import usersRouter from './routes/users.js'
-
-global.__filename = url.fileURLToPath(import.meta.url)
-global.__dirname = url.fileURLToPath(new URL('.', import.meta.url))
+const loggerWeb = require('morgan')
+const logger = require('./api/logger/index.js')
+// routes
+const indexRouter = require('./routes/index.js')
+// io routes
+const { initIO } = require('./api/io')
 
 const app = express()
 const server = http.createServer(app)
+const io = new Server(server)
 
-// set middleware
+/********************** middleware **********************/
 app.use(loggerWeb('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -40,14 +30,13 @@ app.use(cookieParser())
 app.use(express.static('./public'))
 app.use(session(sessionOptions))
 
-// set in development mode
-if (process.env.NODE_ENV == 'development') {
-  // cors
-  app.use(cors(corsOptions))
-}
-app.use('/', indexRouter)
-app.use('/users', usersRouter)
+// cors
+app.use(cors(corsOptions))
 
+/************************ routes ************************/
+app.use('/', indexRouter)
+// init socket.io
+initIO(io)
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404))
@@ -65,9 +54,12 @@ app.use(function (err, req, res, next) {
 })
 
 // app start server
-server.listen(3000, () => {
-  const addr = server.address()
-  logger.info('Web Server Listenning to ' + addr.port)
-})
+try {
+  server.listen(3000, () => {
+    logger.info('Web Server Listenning to port 3000')
+  })
+} catch (err) {
+  logger.error('Web Server not opend')
+}
 
-export default app
+module.exports = app

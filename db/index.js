@@ -1,7 +1,7 @@
 /** @format */
 
-import mongoose from 'mongoose'
-import logger from '../logger'
+const mongoose = require('mongoose')
+const logger = require('../logger')
 
 mongoose
   .connect('mongodb://mongodb:27017/bs', {
@@ -14,4 +14,4 @@ mongoose
     logger.error('Mongo DB Connection Error ' + e)
   })
 
-export default db
+module.exports = db
