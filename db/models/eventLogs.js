@@ -1,8 +1,8 @@
 /** @format */
 
-import mongoose from 'mongoose'
-import { searchArrToStr, makeSearchField } from '../../api/logger/search'
-import mongoosePaginate from 'mongoose-paginate-v2'
+const mongoose = require('mongoose')
+const { searchArrToStr, makeSearchField } = require('../../api/logger/search')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 const eventLogSchema = new mongoose.Schema(
   {
@@ -31,4 +31,4 @@ makeSearchField(eventLogSchema, 'search', (docs) => {
   return searchArrToStr(arr)
 })
 
-export default mongoose.model('EventLog', eventLogSchema)
+module.exports = mongoose.model('EventLog', eventLogSchema)
