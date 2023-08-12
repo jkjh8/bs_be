@@ -1,9 +1,9 @@
 /** @format */
 
-const winston = require('winston')
-require('winston-mongodb')
+import winston from 'winston'
+import 'winston-mongodb'
 
-const moment = require('moment')
+import moment from 'moment'
 moment.locale('ko')
 
 const logFormat = winston.format.printf((info) => {
@@ -38,4 +38,4 @@ if (process.env.NODE_ENV !== 'production') {
     })
   )
 }
-module.exports = logger
+export default logger

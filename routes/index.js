@@ -1,14 +1,16 @@
 /** @format */
 
-const express = require('express')
+import express from 'express'
+import api from './api'
+
 const router = express.Router()
 
 // use router
-router.use('/api', require('./api'))
+router.use('/api', api)
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.send('Hello World')
 })
 
-module.exports = router
+export default router

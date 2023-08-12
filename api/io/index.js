@@ -1,6 +1,6 @@
 /** @format */
 
-const logger = require('../logger')
+import logger from '@/api/logger'
 
 let io_ui, io_device
 
@@ -26,4 +26,4 @@ const initIO = (io) => {
   })
 }
 
-module.exports = { initIO, io_ui, io_device }
+export { initIO, io_ui, io_device }

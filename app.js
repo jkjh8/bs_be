@@ -1,22 +1,22 @@
 /** @format */
 
 // http
-const http = require('http')
-const { Server } = require('socket.io')
-const createError = require('http-errors')
-const express = require('express')
-const cookieParser = require('cookie-parser')
-const cors = require('cors')
-const { corsOptions } = require('./api/cors.js')
-const session = require('express-session')
-const { sessionOptions } = require('./api/session.js')
+import http from 'http'
+import { Server } from 'socket.io'
+import createError from 'http-errors'
+import express from 'express'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import corsOptions from './api/cors.js'
+import session from 'express-session'
+import sessionOptions from './api/session.js'
 // loggers
-const loggerWeb = require('morgan')
-const logger = require('./api/logger/index.js')
+import loggerWeb from 'morgan'
+import logger from './api/logger/index.js'
 // routes
-const indexRouter = require('./routes/index.js')
+import indexRouter from './routes/index.js'
 // io routes
-const { initIO } = require('./api/io')
+import { initIO } from './api/io'
 
 const app = express()
 const server = http.createServer(app)
@@ -37,6 +37,8 @@ app.use(cors(corsOptions))
 app.use('/', indexRouter)
 // init socket.io
 initIO(io)
+
+/******************* error process **********************/
 // catch 404 and forward to error handler
 // app.use(function (req, res, next) {
 //   next(createError(404))
@@ -62,4 +64,4 @@ try {
   logger.error('Web Server not opend')
 }
 
-module.exports = app
+export default app

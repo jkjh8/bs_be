@@ -1,10 +1,9 @@
 /** @format */
 
-module.exports = {
-  corsOptions: {
-    origin: (origin, cb) => {
-      cb(null, origin)
-    },
-    credentials: true
-  }
+export default {
+  origin: (origin, cb) => {
+    cb(null, origin)
+  },
+  credentials: true
 }
+
