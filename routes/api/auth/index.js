@@ -8,17 +8,27 @@ import logger from '@/api/logger'
 
 const router = express.Router()
 
-router.post('/', (req, res, next) => {
-  try {
-    console.log(req.body)
-    passport.authenticate('local', (err, user, info) => {
-      console.log(err, user, info)
-      // success login
-      res.status(200).json({ result: true })
-    })(req, res, next)
-  } catch (err) {
-    console.log(err)
+router.get('/', (req, res) => {
+  console.log(req.isAuthenticated())
+  if (req.isAuthenticated()) {
+    return res.json(req.user)
   }
+  return res.send(null)
+})
+
+router.post('/', (req, res, next) => {
+  passport.authenticate('local', async (err, user, info) => {
+    if (err) return res.status(500).json({ err, info })
+    if (!user) return res.status(401).json({ err, info })
+    // success login
+    req.login(user, async (err) => {
+      user.numberOfLogins++
+      user.loginAt = Date.now()
+      await user.save()
+      // return result
+      res.status(200).json({ result: true, info })
+    })
+  })(req, res, next)
 })
 
 router.post('/signup', async (req, res) => {
