@@ -10,6 +10,8 @@ import cors from 'cors'
 import corsOptions from './api/cors.js'
 import session from 'express-session'
 import sessionOptions from './api/session.js'
+// db
+import connectMongoose from './db'
 // loggers
 import loggerWeb from 'morgan'
 import logger from './api/logger/index.js'
@@ -17,6 +19,9 @@ import logger from './api/logger/index.js'
 import indexRouter from './routes/index.js'
 // io routes
 import { initIO } from './api/io'
+
+// mongoose connected
+connectMongoose()
 
 const app = express()
 const server = http.createServer(app)

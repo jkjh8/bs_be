@@ -1,17 +1,13 @@
 /** @format */
 
-const mongoose = require('mongoose')
-const logger = require('../logger')
+import mongoose from 'mongoose'
+import logger from '@/api/logger'
 
-mongoose
-  .connect('mongodb://mongodb:27017/bs', {
-    useNewUrlParser: true
-  })
-  .then(() => {
+export default async function () {
+  try {
+    await mongoose.connect('mongodb://mongodb:27017/bs')
     logger.info('Mongo DB Connected!')
-  })
-  .catch((e) => {
+  } catch (err) {
     logger.error('Mongo DB Connection Error ' + e)
-  })
-
-module.exports = db
+  }
+}

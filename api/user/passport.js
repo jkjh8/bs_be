@@ -2,7 +2,9 @@
 
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
-import User from '../../db/models/user.js'
+import bcrypt from 'bcrypt'
+// db models
+import User from '@/db/models/user.js'
 
 export default function () {
   // serialize user to cookie
@@ -29,8 +31,8 @@ export default function () {
           // not find user email
           if (!usr)
             return done(null, false, { message: '사용자를 찾을 수 없습니다.' })
-          // login success
-          if (await usr.verifyPassword(password)) {
+          // compare password and hash
+          if (await bcrypt.compare(password, usr.userPassword)) {
             delete usr['userPassword']
             return done(null, usr, { message: '로그인 성공' })
           }
