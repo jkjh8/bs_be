@@ -10,6 +10,8 @@ import cors from 'cors'
 import corsOptions from './api/cors.js'
 import session from 'express-session'
 import sessionOptions from './api/session.js'
+import passport from 'passport'
+import passportConfig from './api/user/passport.js'
 // db
 import connectMongoose from './db'
 // loggers
@@ -37,6 +39,11 @@ app.use(session(sessionOptions))
 
 // cors
 app.use(cors(corsOptions))
+
+// passport config
+passportConfig()
+app.use(passport.initialize())
+app.use(passport.session())
 
 /************************ routes ************************/
 app.use('/', indexRouter)

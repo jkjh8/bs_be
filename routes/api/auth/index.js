@@ -1,11 +1,25 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
+import passport from 'passport'
 // db models
 import User from '@/db/models/user'
 // local apis
 import logger from '@/api/logger'
 
 const router = express.Router()
+
+router.post('/', (req, res, next) => {
+  try {
+    console.log(req.body)
+    passport.authenticate('local', (err, user, info) => {
+      console.log(err, user, info)
+      // success login
+      res.status(200).json({ result: true })
+    })(req, res, next)
+  } catch (err) {
+    console.log(err)
+  }
+})
 
 router.post('/signup', async (req, res) => {
   try {
