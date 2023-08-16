@@ -9,7 +9,6 @@ import logger from '@/api/logger'
 const router = express.Router()
 
 router.get('/', (req, res) => {
-  console.log(req.isAuthenticated())
   if (req.isAuthenticated()) {
     return res.json(req.user)
   }
@@ -56,9 +55,20 @@ router.get('/exists_email', async (req, res) => {
     const r = await User.find({ email: email }, { userPassword: false })
     res.status(200).json({ result: true, user: r })
   } catch (err) {
-    console.log(err)
+    logger.error(`check dub email error: ${err}`)
     res.status(500).json(err)
   }
+})
+
+router.get('/signout', async (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      logger.error(`user signout error: ${req.user.email} ${err}`)
+      return res.status(500).json({ error: err })
+    }
+    req.session.destroy()
+    res.status(200).json({ result: true, user: null })
+  })
 })
 
 export default router
