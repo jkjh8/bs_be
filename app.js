@@ -35,7 +35,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static('./public'))
-app.use(session(sessionOptions))
+
+// session
+const sessionMiddleware = session(sessionOptions)
+app.use(sessionMiddleware)
 
 // cors
 app.use(cors(corsOptions))
@@ -48,7 +51,8 @@ app.use(passport.session())
 /************************ routes ************************/
 app.use('/', indexRouter)
 // init socket.io
-initIO(io)
+io.engine.use(sessionMiddleware)
+initIO(io, sessionMiddleware)
 
 /******************* error process **********************/
 // catch 404 and forward to error handler
