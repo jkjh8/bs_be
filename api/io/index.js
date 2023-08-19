@@ -19,7 +19,7 @@ const initIO = (io, sessionMiddleware) => {
   // only allow authenticated users
   io_ui.use((socket, next) => {
     const req = socket.request
-    console.log('middleware', req.session, 'id:', req.session.id, req)
+    console.log('middleware', req.session, 'id:', socket.handshake)
     next()
     // const session = socket.request.session
     // if (session && session.authenticated) {

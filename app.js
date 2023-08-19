@@ -20,7 +20,8 @@ import logger from './api/logger/index.js'
 // routes
 import indexRouter from './routes/index.js'
 // io routes
-import { initIO } from './api/io'
+import { initUserinterfaceIo } from './api/io/userInterface.js'
+import { initDeviceIo } from './api/io/harwareBridge.js'
 
 // mongoose connected
 connectMongoose()
@@ -48,11 +49,12 @@ passportConfig()
 app.use(passport.initialize())
 app.use(passport.session())
 
-/************************ routes ************************/
-app.use('/', indexRouter)
 // init socket.io
 io.engine.use(sessionMiddleware)
-initIO(io, sessionMiddleware)
+initUserinterfaceIo(io)
+initDeviceIo(io)
+/************************ routes ************************/
+app.use('/', indexRouter)
 
 /******************* error process **********************/
 // catch 404 and forward to error handler
