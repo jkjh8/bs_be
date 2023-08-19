@@ -9,7 +9,7 @@ const eventLogSchema = new mongoose.Schema(
     source: String,
     level: Number,
     priority: Number,
-    id: String,
+    user: String,
     zones: Array,
     message: String,
     search: String

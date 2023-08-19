@@ -9,17 +9,7 @@ const deviceSchema = new mongoose.Schema(
     deviceType: {
       type: String,
       model: String
-    },
-    numberOfChannels: Number,
-    channels: [
-      {
-        channel: Number,
-        name: String,
-        destination: String,
-        port: Number,
-        channelType: String
-      }
-    ]
+    }
   },
   {
     timestamps: true
