@@ -48,7 +48,7 @@ router.post('/signup', async (req, res) => {
 router.get('/exists_email', async (req, res) => {
   try {
     const { email } = req.query
-    const r = await User.find({ email: email }, { userPassword: false })
+    const r = await User.find({ email: email }, { userPassword: false }).exec()
     res.status(200).json({ result: true, user: r })
   } catch (err) {
     logger.error(`check dub email error: ${err}`)

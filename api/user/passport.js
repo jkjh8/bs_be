@@ -17,7 +17,7 @@ export default function () {
       const r = await User.findOne(
         { email: user.email },
         { userPassword: 0, _id: 0 }
-      )
+      ).exec()
       return done(null, r)
     } catch (err) {
       return done(err, null)
@@ -30,7 +30,7 @@ export default function () {
       { usernameField: 'email', passwordField: 'userPassword' },
       async (email, password, done) => {
         try {
-          const user = await User.findOne({ email: email })
+          const user = await User.findOne({ email: email }).exec()
           // not find user email
           if (!user)
             return done(null, false, {
