@@ -1,5 +1,6 @@
 /** @format */
 
+import path from 'path'
 // http
 import http from 'http'
 import { Server } from 'socket.io'
@@ -53,6 +54,10 @@ app.use(passport.session())
 io.engine.use(sessionMiddleware)
 initUserinterfaceIo(io)
 initDeviceIo(io)
+
+// static
+app.use(express.static(path.resolve(__dirname, 'public', 'spa')))
+
 /************************ routes ************************/
 app.use('/', indexRouter)
 

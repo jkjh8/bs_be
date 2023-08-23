@@ -1,5 +1,6 @@
 /** @format */
 
+import path from 'path'
 import express from 'express'
 import api from './api'
 
@@ -10,7 +11,7 @@ router.use('/api', api)
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.send('Hello World')
+  res.sendFile(path.resolve('public', 'spa', 'index.html'))
 })
 
 export default router
