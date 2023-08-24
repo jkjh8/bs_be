@@ -7,7 +7,7 @@ const deviceSchema = new mongoose.Schema(
     ipaddress: { type: String, unique: true },
     port: { type: Number, default: 4444 },
     deviceType: {
-      type: String,
+      deviceType: String,
       model: String
     }
   },
