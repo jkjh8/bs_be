@@ -22,7 +22,7 @@ import logger from './api/logger/index.js'
 import indexRouter from './routes/index.js'
 // io routes
 import { initUserinterfaceIo } from './api/io/userInterface.js'
-import { initDeviceIo } from './api/io/harwareBridge.js'
+import { initDeviceIo } from './api/io/hardwareBridge.js'
 
 // mongoose connected
 connectMongoose()

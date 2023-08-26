@@ -7,10 +7,10 @@ const searchArrToStr = (arr) => {
 }
 
 const makeSearchField = (schema, searchField, getter) => {
-  schema.pre('save', () => {
+  schema.pre('save', function () {
     this[searchField] = getter(this)
   })
-  schema.post('updateOne', async () => {
+  schema.post('updateOne', async function () {
     const docUpated = await this.model.findOne(this.getFilter())
     if (docUpated) await docUpated.save()
   })

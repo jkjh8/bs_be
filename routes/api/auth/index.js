@@ -20,7 +20,11 @@ router.post('/', (req, res, next) => {
     if (err) return res.status(500).json({ err, info })
     if (!user) return res.status(401).json({ err, info })
     req.login(user, (err) => {
-      if (err) return next(err)
+      if (err) {
+        logger.error(`user login faild ${err}`)
+        return next(err)
+      }
+      logger.info(`user login success: ${req.user.email}`)
       return res.status(200).json({ result: true, info })
     })
   })(req, res, next)

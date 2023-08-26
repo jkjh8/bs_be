@@ -1,6 +1,7 @@
 /** @format */
 
 import winston from 'winston'
+import CustomMongo from './winstonCustomMongo'
 import 'winston-mongodb'
 
 import moment from 'moment'
@@ -16,13 +17,14 @@ const udpateTimeZone = (time) => {
 
 const logger = winston.createLogger({
   transports: [
-    new winston.transports.MongoDB({
-      db: 'mongodb://mongodb:27017/bs',
-      collection: 'logs',
-      options: {
-        useUnifiedTopology: true
-      }
-    })
+    // new winston.transports.MongoDB({
+    //   db: 'mongodb://mongodb:27017/bs',
+    //   collection: 'logs',
+    //   options: {
+    //     useUnifiedTopology: true
+    //   }
+    // }),
+    new CustomMongo()
   ]
 })
 

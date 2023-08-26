@@ -1,6 +1,7 @@
 import express from 'express'
 import Devices from '@/db/models/device'
 import logger from '@/api/logger'
+import { addELog } from '@/api/logger/eventlog'
 
 const router = express.Router()
 
@@ -19,6 +20,12 @@ router.post('/', async (req, res) => {
       ...req.body
     })
     await newDevice.save()
+    // add event log
+    await addELog({
+      priority: 'info',
+      user: req.user.email,
+      message: `device added: ${req.body.name} ${req.body.ipaddress} ${req.body.deviceType.deviceType} ${req.body.deviceType.model}`
+    })
     res.status(200).json({ result: true, deivce: newDevice })
   } catch (err) {
     logger.error(`add device error: ${err}`)
@@ -37,9 +44,13 @@ router.get('/exists', async (req, res) => {
   }
 })
 
-router.get('/remove', async (req, res) => {
+router.delete('/', async (req, res) => {
   try {
-    const r = await Devices.findByIdAndRemove(req.query.id)
+    const r = await Devices.findByIdAndRemove(req.body._id)
+    await addELog({
+      user: req.user.email,
+      message: `device removed: ${req.body.name} ${req.body.ipaddress} ${req.body.deviceType.deviceType} ${req.body.deviceType.model}`
+    })
     res.status(200).json({ result: true, data: r })
   } catch (err) {
     logger.error(`device remove error: ${err}`)
