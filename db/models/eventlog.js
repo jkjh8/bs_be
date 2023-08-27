@@ -7,7 +7,7 @@ import { searchArrToStr, makeSearchField } from '@/api/logger/search'
 const eventLogSchema = new mongoose.Schema(
   {
     source: String,
-    level: Number,
+    level: String,
     priority: String,
     user: String,
     zones: Array,

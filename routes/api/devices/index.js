@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
     await addELog({
       priority: 'info',
       user: req.user.email,
-      message: `device added: ${req.body.name} ${req.body.ipaddress} ${req.body.deviceType.deviceType} ${req.body.deviceType.model}`
+      message: `device added: ${req.body.name} ${req.body.deviceType.deviceType} ${req.body.deviceType.model}  ${req.body.ipaddress} `
     })
     res.status(200).json({ result: true, deivce: newDevice })
   } catch (err) {
@@ -49,7 +49,7 @@ router.delete('/', async (req, res) => {
     const r = await Devices.findByIdAndRemove(req.body._id)
     await addELog({
       user: req.user.email,
-      message: `device removed: ${req.body.name} ${req.body.ipaddress} ${req.body.deviceType.deviceType} ${req.body.deviceType.model}`
+      message: `device removed: ${req.body.name} ${req.body.deviceType.deviceType} ${req.body.deviceType.model} ${req.body.ipaddress} `
     })
     res.status(200).json({ result: true, data: r })
   } catch (err) {
@@ -57,4 +57,5 @@ router.delete('/', async (req, res) => {
     res.status(500).json({ result: false, error: err })
   }
 })
+
 export default router
