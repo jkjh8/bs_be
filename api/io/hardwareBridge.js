@@ -1,5 +1,7 @@
 import logger from '@/api/logger'
 import Bridge from '@/db/models/bridge'
+import path from 'path'
+import { writeFile } from 'fs'
 
 let io_device
 
@@ -25,6 +27,16 @@ const initDeviceIo = (io) => {
       socket.disconnect(true)
       logger.info(`Socket.io device disconnected not allowed`)
     }
+
+    // file upload
+
+    socket.on('upload', (file, callback) => {
+      console.log(file)
+      writeFile(file.name, file.data, (err) => {
+        callback({ message:err ? 'failure': 'success'})
+      })
+    })
+    // disconnect
     socket.on('disconnect', (reason) => {
       logger.info(`Socket.io device disconnected: ${socket.id} ${reason}`)
     })
