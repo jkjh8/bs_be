@@ -2,7 +2,8 @@ import logger from '@/api/logger'
 import Bridge from '@/db/models/bridge'
 import path from 'path'
 import { writeFile } from 'fs'
-
+import db from '../../db'
+import Device from '@/db/models/device'
 let io_device
 
 const initDeviceIo = (io) => {
@@ -33,13 +34,18 @@ const initDeviceIo = (io) => {
     socket.on('upload', (file, callback) => {
       console.log(file)
       writeFile(file.name, file.data, (err) => {
-        callback({ message:err ? 'failure': 'success'})
+        callback({ message: err ? 'failure' : 'success' })
       })
     })
     // disconnect
     socket.on('disconnect', (reason) => {
       logger.info(`Socket.io device disconnected: ${socket.id} ${reason}`)
     })
+    // devices
+    socket.on('getDevices', async () => {
+      socket.emit('devices', await Device.find())
+    })
+
     // TODO: req.session.count ++; req.session.save();
   })
 }
