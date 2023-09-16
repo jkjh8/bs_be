@@ -1,7 +1,7 @@
 /** @format */
 
 import winston from 'winston'
-import CustomMongo from './winstonCustomMongo'
+import CustomMongo from './wCustom'
 import 'winston-mongodb'
 
 import moment from 'moment'
