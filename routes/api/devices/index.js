@@ -16,12 +16,10 @@ router.get('/', async (req, res) => {
 
 router.get('/uid', async function (req, res) {
   try {
-    res
-      .status(200)
-      .json({
-        result: true,
-        devices: await Devices.find({ id: req.params.id })
-      })
+    res.status(200).json({
+      result: true,
+      devices: await Devices.find({ id: req.query.id })
+    })
   } catch (error) {
     logger.error(`get device uid error: ${error}`)
     res.status(500).json({ result: false, error: error })
