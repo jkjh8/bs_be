@@ -7,6 +7,8 @@ import db from '../../../db'
 import Device from '@/db/models/device'
 let io_device
 
+let sockets = {}
+
 const initDeviceIo = (io) => {
   io_device = io.of('/device')
 
@@ -22,13 +24,21 @@ const initDeviceIo = (io) => {
     const req = socket.request
     const r = await Bridge.findOne({ id: req.headers.apikey })
     if (r && r.id) {
-      socket.emit('devices', await Device.find())
+      // add sockets object to socket
+      sockets[req.headers.type] = socket
+      // return device lists
+      socket.emit(
+        'devices',
+        await Device.find({
+          'deviceType.deviceType': req.headers.type.toUpperCase()
+        })
+      )
       logger.info(
-        `Socket.io device connected type: ${r.type} socket: ${socket.id} uuid: ${r.id}`
+        `Socket.io DEVICE connected -- type: ${req.headers.type} socket: ${socket.id} uuid: ${r.id}`
       )
     } else {
       socket.disconnect(true)
-      logger.info(`Socket.io device disconnected not allowed`)
+      logger.info(`Socket.io DEVICE disconnected not allowed`)
     }
 
     // file upload
@@ -41,11 +51,13 @@ const initDeviceIo = (io) => {
     })
     // disconnect
     socket.on('disconnect', (reason) => {
-      logger.info(`Socket.io device disconnected: ${socket.id} ${reason}`)
+      logger.info(`Socket.io DEVICE disconnected -- ${socket.id} ${reason}`)
     })
     // devices
     socket.on('getDevices', async () => {
-      logger.info(`get device list type:${req.headers.type} id:${socket.id}`)
+      logger.info(
+        `Get DEVICE list -- type: ${req.headers.type} id:${socket.id}`
+      )
       socket.emit('devices', await Device.find())
     })
 

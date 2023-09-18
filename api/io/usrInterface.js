@@ -22,10 +22,12 @@ const initUserinterfaceIo = (io) => {
   io_ui.on('connection', (socket) => {
     const req = socket.request
     logger.info(
-      `Socket.io user connected: ${socket.id} ${req.session.passport.user.email}`
+      `Socket.io USER-INTERFACE connected -- ${socket.id} ${req.session.passport.user.email}`
     )
     socket.on('disconnect', (reason) => {
-      logger.info(`Socket.io user disconnected: ${socket.id} ${reason}`)
+      logger.info(
+        `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`
+      )
     })
     // TODO: req.session.count ++; req.session.save();
   })
