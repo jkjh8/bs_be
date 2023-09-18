@@ -13,7 +13,7 @@ const addELog = async (args) => {
     }
     const elog = new Eventlog(d)
     await elog.save()
-    logger.info(`Eventlog added :${d}`)
+    logger.info(`Eventlog added :${JSON.stringify(d)}`)
     return d
   } catch (error) {
     logger.error(`Eventlog add error ${error}`)

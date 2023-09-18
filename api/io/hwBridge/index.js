@@ -1,4 +1,5 @@
 import logger from '@/api/logger'
+import { addELog } from '@/api/logger/eventlog'
 import Bridge from '@/db/models/bridge'
 import path from 'path'
 import { writeFile } from 'fs'
@@ -46,6 +47,11 @@ const initDeviceIo = (io) => {
     socket.on('getDevices', async () => {
       logger.info(`get device list type:${req.headers.type} id:${socket.id}`)
       socket.emit('devices', await Device.find())
+    })
+
+    // eventlog
+    socket.on('eventlog', async (args) => {
+      await addELog(args)
     })
 
     // TODO: req.session.count ++; req.session.save();
