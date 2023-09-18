@@ -24,7 +24,7 @@ import logger from './api/logger/index.js'
 import indexRouter from './routes/index.js'
 // io routes
 import { initUserinterfaceIo } from './api/io/usrInterface.js'
-import { initDeviceIo } from './api/io/hwBridge.js'
+import { initDeviceIo } from './api/io/hwBridge'
 
 // mongoose connected
 connectMongoose()
@@ -33,7 +33,7 @@ const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
   maxHttpBufferSize: 1e8 // file transfer limit 100MB
-}) 
+})
 
 /********************** middleware **********************/
 app.use(loggerWeb('dev'))
