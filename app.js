@@ -3,11 +3,12 @@
 import path from 'path'
 import fs from 'fs'
 // import axios from 'axios'
+import https from 'https'
 // http
 import http from 'http'
 import { Server } from 'socket.io'
 import createError from 'http-errors'
-import express from 'express'
+import express, { application, json } from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import corsOptions from './api/cors.js'
@@ -90,5 +91,24 @@ try {
 } catch (err) {
   logger.error('Web Server not opend')
 }
+
+// const agent = new https.Agent({
+//   rejectUnauthorized: false
+// })
+// axios
+//   .post(
+//     'https://192.168.1.150/api/v0/logon',
+//     {
+//       username: 'admin',
+//       password: 'password'
+//     },
+//     { httpsAgent: agent }
+//   )
+//   .then((res) => {
+//     console.log(res)
+//   })
+//   .catch((e) => {
+//     console.error(e)
+//   })
 
 export default app

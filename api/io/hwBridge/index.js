@@ -61,6 +61,11 @@ const initDeviceIo = (io) => {
       socket.emit('devices', await Device.find())
     })
 
+    // device datas
+    socket.on('qsysData', (args) => {
+      console.log('qsys data: ', args)
+    })
+
     // eventlog
     socket.on('eventlog', async (args) => {
       await addELog(args)
