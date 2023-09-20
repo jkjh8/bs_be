@@ -26,6 +26,7 @@ import indexRouter from './routes/index.js'
 // io routes
 import { initUserinterfaceIo } from './api/io/usrInterface.js'
 import { initDeviceIo } from './api/io/hwBridge'
+import { initQsysIo } from './api/io/qsys'
 
 // mongoose connected
 connectMongoose()
@@ -59,6 +60,7 @@ app.use(passport.session())
 io.engine.use(sessionMiddleware)
 initUserinterfaceIo(io)
 initDeviceIo(io)
+initQsysIo(io)
 
 // static
 app.use(express.static(path.resolve(__dirname, 'public', 'spa')))

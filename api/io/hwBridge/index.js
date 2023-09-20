@@ -22,7 +22,7 @@ const initDeviceIo = (io) => {
 
   io_device.on('connection', async (socket) => {
     const req = socket.request
-    const r = await Bridge.findOne({ id: req.headers.apikey })
+    const r = await Bridge.findOne({ id: req.headers.uid })
     if (r && r.id) {
       // add sockets object to socket
       sockets[req.headers.type] = socket
@@ -76,3 +76,13 @@ const initDeviceIo = (io) => {
 }
 
 export { io_device, initDeviceIo }
+
+async function commands(socket, args) {
+  switch (args.command) {
+    case 'getDevices':
+      logger.info(
+        `Get DEVICE list -- type: ${req.headers.type} id:${socket.id}`
+      )
+      break
+  }
+}
