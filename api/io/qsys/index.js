@@ -59,6 +59,8 @@ async function commands(socket, args) {
         data: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
       })
       break
+    case 'logger':
+      await addELog(args.value)
   }
 }
 
