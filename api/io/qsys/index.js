@@ -36,48 +36,58 @@ const initQsysIo = (io) => {
     socket.on('disconnect', (reason) => {
       const idx = sockets.indexOf(socket)
       if (idx > -1) sockets.splice(idx, 1)
+      console.log(sockets.length)
       logger.info(`Socket.IO Q-SYS Disconnect -- ${socket.id} ${reason}`)
     })
 
     socket.on('data', (args) => {
-      console.log(args)
       commands(socket, args)
     })
     // emit data devices
-    socket.emit('data', {
-      command: 'devices',
-      value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
-    })
+    socket.emit(
+      'data',
+      JSON.stringify({
+        command: 'devices',
+        value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+      })
+    )
+
     logger.info(`Socket.IO Q-SYS Connected -- ${socket.id}`)
     sockets.push(socket)
+    console.log(sockets.length)
   })
 }
 
 async function commands(socket, obj) {
   switch (obj.command) {
-    case 'getStatus':
-      socket.emit({
-        command: 'devices',
-        value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
-      })
+    case 'devices':
+      socket.emit(
+        'data',
+        JSON.stringify({
+          command: 'devices',
+          value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+        })
+      )
       break
     case 'connect':
-      console.log(obj)
-      console.log(
-        await Device.updateOne({ _id: obj.value._id }, { connected: true })
+      await Device.updateOne({ _id: obj.value._id }, { connected: true })
+      socket.emit(
+        'data',
+        JSON.stringify({
+          command: 'devices',
+          value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+        })
       )
-
-      socket.emit({
-        command: 'devices',
-        value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
-      })
       break
     case 'disconnect':
       await Device.updateOne({ _id: obj.value._id }, { connected: false })
-      socket.emit({
-        command: 'devices',
-        value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
-      })
+      socket.emit(
+        'data',
+        JSON.stringify({
+          command: 'devices',
+          value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+        })
+      )
       break
     case 'logger':
       await addELog(obj.value)
