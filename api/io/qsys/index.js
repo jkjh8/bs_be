@@ -21,8 +21,9 @@ const initQsysIo = (io) => {
   })
 
   io_qsys.on('connection', async (socket) => {
-    const { uid, type } = socket.request.headers
-    const r = await Bridge.findOne({ id: uid })
+    const { deviceid, type } = socket.request.headers
+    // console.log(socket.request.headers)
+    const r = await Bridge.findOne({ id: deviceid })
     if (!r) {
       socket.disconnect(true)
       logger.error(`Socket.IO Q-SYS disconnected! unregistered device `)
@@ -39,28 +40,47 @@ const initQsysIo = (io) => {
     })
 
     socket.on('data', (args) => {
+      console.log(args)
       commands(socket, args)
     })
-
+    // emit data devices
     socket.emit('data', {
       command: 'devices',
-      data: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+      value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
     })
     logger.info(`Socket.IO Q-SYS Connected -- ${socket.id}`)
     sockets.push(socket)
   })
 }
 
-async function commands(socket, args) {
-  switch (args.command) {
+async function commands(socket, obj) {
+  switch (obj.command) {
     case 'getStatus':
       socket.emit({
         command: 'devices',
-        data: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+        value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+      })
+      break
+    case 'connect':
+      console.log(obj)
+      console.log(
+        await Device.updateOne({ _id: obj.value._id }, { connected: true })
+      )
+
+      socket.emit({
+        command: 'devices',
+        value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+      })
+      break
+    case 'disconnect':
+      await Device.updateOne({ _id: obj.value._id }, { connected: false })
+      socket.emit({
+        command: 'devices',
+        value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
       })
       break
     case 'logger':
-      await addELog(args.value)
+      await addELog(obj.value)
   }
 }
 

@@ -9,6 +9,7 @@ const deviceSchema = new mongoose.Schema(
     username: { type: String, default: 'admin' },
     password: { type: String, default: 'password' },
     token: String,
+    connected: { type: Boolean, default: false },
     deviceType: {
       deviceType: String,
       model: String
