@@ -43,6 +43,11 @@ const initQsysIo = (io) => {
     socket.on('data', (args) => {
       commands(socket, args)
     })
+
+    socket.on('qsys:data', (data) => {
+      console.log(data)
+    })
+
     // emit data devices
     socket.emit(
       'data',
