@@ -24,9 +24,9 @@ import logger from './api/logger/index.js'
 // routes
 import indexRouter from './routes/index.js'
 // io routes
-import { initUserinterfaceIo } from './api/io/usrInterface.js'
-import { initDeviceIo } from './api/io/hwBridge'
-import { initQsysIo } from './api/io/qsys'
+// import { initUserinterfaceIo } from './api/io/usrInterface.js'
+// import { initDeviceIo } from './api/io/hwBridge'
+import { initIO } from './api/io'
 
 // mongoose connected
 connectMongoose()
@@ -58,9 +58,7 @@ app.use(passport.session())
 
 // init socket.io
 io.engine.use(sessionMiddleware)
-initUserinterfaceIo(io)
-initDeviceIo(io)
-initQsysIo(io)
+initIO(io)
 
 // static
 app.use(express.static(path.resolve(__dirname, 'public', 'spa')))
@@ -114,3 +112,4 @@ try {
 //   })
 
 export default app
+export { io }

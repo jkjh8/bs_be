@@ -1,56 +1,41 @@
 /** @format */
 
 import logger from '@/api/logger'
+import Bridge from '@/db/models/bridge'
 
-let io_ui, io_device
+let socketio
 
-const initIO = (io, sessionMiddleware) => {
+const initIO = (io) => {
+  socketio = io
   // session middleware
-  // const wrap = (middleware) => (socket, next) =>
-  //   middleware(socket.request, {}, next)
-  // io.engine.use(sessionMiddleware)
-
-  // namespace
-  io_ui = io.of('/ui')
-  io_device = io.of('/device')
-
-  // io.use(wrap(sessionMiddleware))
-
-  // only allow authenticated users
-  io_ui.use((socket, next) => {
-    const req = socket.request
-    console.log('middleware', req.session, 'id:', socket.handshake)
-    next()
-    // const session = socket.request.session
-    // if (session && session.authenticated) {
-    //   console.log(session)
-    //   next()
-    // } else {
-    //   next(new Error('unauthorized'))
-    // }
-    // next()
+  io.use(async (socket, next) => {
+    const session = socket.request.session
+    const token = socket.handshake.auth.token
+    if (token && (await Bridge({ id: token }))) {
+      console.log('device checked ', token)
+      return next()
+    }
+    if (session && session.passport && session.passport.user) {
+      return next()
+    }
+    next(new Error('Not authenticated'))
   })
 
-  // io ui init
-  io_ui.on('connection', (socket) => {
+  io.on('connection', (socket) => {
     const req = socket.request
-    logger.info(`socket.io connected ui: ${socket.id}`)
-
-    // add socket returns
-    socket.on('disconnect', () => {
-      logger.info(`socket.io disconnected ui: ${socket.id}`)
-    })
-    // TODO: req.session.count ++; req.session.save();
-  })
-
-  // io device init
-  io_device.on('connection', (socket) => {
-    logger.info(`socket.io connected device: ${socket.id}`)
-    // add socket returns
-    socket.on('disconnect', () => {
-      logger.info(`socket.io disconnected device: ${socket.id}`)
+    const session = req.session
+    const passport = req.session.passport
+    logger.info(
+      `Socket.io connected -- ${socket.id} ${
+        passport && passport.user.email ? passport.user.email : ''
+      }`
+    )
+    socket.on('disconnect', (reason) => {
+      logger.info(
+        `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`
+      )
     })
   })
 }
 
-export { initIO, io_ui, io_device }
+export { initIO }

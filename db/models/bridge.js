@@ -10,4 +10,4 @@ const bridgeSchema = new mongoose.Schema(
   }
 )
 
-export default mongoose.model('bridge', bridgeSchema)
+export default mongoose.model('Bridge', bridgeSchema)
