@@ -2,6 +2,7 @@
 
 import logger from '@/api/logger'
 import Bridge from '@/db/models/bridge'
+import Device from '@/db/models/device'
 
 let socketio
 
@@ -35,7 +36,22 @@ const initIO = (io) => {
         `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`
       )
     })
+
+    socket.on('qsys:data', (msg) => {
+      console.log(msg)
+    })
+
+    socket.on('qsys:devices', async () => {
+      socket.emit(
+        'qsys:data',
+        JSON.stringify({
+          command: 'devices',
+          value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+        })
+      )
+    })
   })
+  logger.info(`init socket.io`)
 }
 
 export { initIO }
