@@ -19,6 +19,7 @@ const initIO = (io) => {
     if (session && session.passport && session.passport.user) {
       return next()
     }
+    socket.emit('Not authenticated')
     next(new Error('Not authenticated'))
   })
 
