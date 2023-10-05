@@ -18,6 +18,7 @@ const deviceSchema = new mongoose.Schema(
     mute: Object,
     status: Object,
     zones: Object,
+    PaConfig: Object,
     ZoneStatusConfigure: Boolean
   },
   {
