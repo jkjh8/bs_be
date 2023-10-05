@@ -9,15 +9,22 @@ async function qsysDataParser(obj) {
     case 'zones':
       const curr = await Device.findOne({ deviceId })
       console.log('curr', curr)
-      let zones = { ...curr.zones }
 
       if (curr && curr.zones) {
+        let zones = { ...curr.zones }
+        for (let objkey in data) {
+          console.log(objkey, data[objkey])
+          if (zones[objkey]) {
+            zones[objkey] = { ...zones[objkey], ...data[objkey] }
+          }
+        }
         console.log('get zones')
+        r = await Device.updateOne({ deviceId }, { zones })
       } else {
         console.log('not zones')
+        r = await Device.updateOne({ deviceId }, { zones: data })
       }
 
-      r = await Device.updateOne({ deviceId }, { zones: data })
       break
     case 'ZoneStatusConfigure':
       r = await Device.updateOne({ deviceId }, { ZoneStatusConfigure: data })
