@@ -13,7 +13,12 @@ const deviceSchema = new mongoose.Schema(
     deviceType: {
       deviceType: String,
       model: String
-    }
+    },
+    gain: Object,
+    mute: Object,
+    status: Object,
+    zones: Object,
+    ZoneStatusConfigure: Boolean
   },
   {
     timestamps: true

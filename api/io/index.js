@@ -3,11 +3,11 @@
 import logger from '@/api/logger'
 import Bridge from '@/db/models/bridge'
 import Device from '@/db/models/device'
+import { qsysDataParser } from '../qsys'
 
-let socketio
+let qsysSocket = null
 
 const initIO = (io) => {
-  socketio = io
   // session middleware
   io.use(async (socket, next) => {
     const session = socket.request.session
@@ -26,12 +26,19 @@ const initIO = (io) => {
   io.on('connection', (socket) => {
     const req = socket.request
     const session = req.session
-    const passport = req.session.passport
-    logger.info(
-      `Socket.io connected -- ${socket.id} ${
-        passport && passport.user.email ? passport.user.email : ''
-      }`
-    )
+    const passport = session.passport
+    // qsys bridge
+    if (req.headers.type && req.headers.type === 'qsys') {
+      qsysSocket = socket
+      logger.info(`Socket.io Q-SYS connected -- ${qsysSocket.id}`)
+    } else {
+      // nomal user
+      logger.info(
+        `Socket.io connected -- ${socket.id} ${
+          passport && passport.user.email ? passport.user.email : ''
+        }`
+      )
+    }
     socket.on('disconnect', (reason) => {
       logger.info(
         `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`
@@ -39,7 +46,8 @@ const initIO = (io) => {
     })
 
     socket.on('qsys:data', (msg) => {
-      console.log(msg)
+      console.log('get data')
+      qsysDataParser(JSON.parse(msg))
     })
 
     socket.on('qsys:devices', async () => {
@@ -55,4 +63,4 @@ const initIO = (io) => {
   logger.info(`init socket.io`)
 }
 
-export { initIO }
+export { initIO, qsysSocket }
