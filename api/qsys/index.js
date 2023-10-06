@@ -1,27 +1,30 @@
 import Device from '@/db/models/device'
 async function qsysDataParser(obj) {
-  let r
+  console.log(obj)
   const { deviceId, key, data } = obj
+  let curr
+  let r
   switch (key) {
     case 'status':
       r = await Device.updateOne({ deviceId }, { status: data })
       break
     case 'zones':
-      const curr = await Device.findOne({ deviceId })
-      console.log('curr', curr)
-
+      // find current data
+      curr = await Device.findOne({ deviceId })
+      // update data
       if (curr && curr.zones) {
         let zones = { ...curr.zones }
         for (let objkey in data) {
-          console.log(objkey, data[objkey])
           if (zones[objkey]) {
             zones[objkey] = { ...zones[objkey], ...data[objkey] }
+          } else {
+            zones[objkey] = data[objkey]
           }
+          // update db
         }
-        console.log('get zones')
-        r = await Device.updateOne({ deviceId }, { zones })
+        r = await Device.updateOne({ deviceId }, { zones: zones })
       } else {
-        console.log('not zones')
+        // not exist current data
         r = await Device.updateOne({ deviceId }, { zones: data })
       }
 
@@ -30,10 +33,15 @@ async function qsysDataParser(obj) {
       r = await Device.updateOne({ deviceId }, { ZoneStatusConfigure: data })
       break
     case 'gainAndMute':
-      r = await Device.updateOne(
-        { deviceId },
-        { gain: obj.gain, mute: obj.mute }
-      )
+      curr = await Device.findOne({ deviceId })
+      if (curr && curr.zones) {
+        let zones = { ...curr.zones }
+        for (let objkey in data) {
+          zones[objkey] = { ...zones[objkey], ...data.gain[objkey] }
+        }
+        console.log('gain')
+        r = await Device.updateOne({ deviceId }, { zones })
+      }
     case 'PaConfig':
       r = await Device.updateOne({ deviceId }, { PaConfig: data })
       break
