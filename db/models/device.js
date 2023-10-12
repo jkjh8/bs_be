@@ -14,11 +14,11 @@ const deviceSchema = new mongoose.Schema(
       deviceType: String,
       model: String
     },
-    gain: Object,
-    mute: Object,
-    status: Object,
-    zones: Object,
+    EngineStatus: Object,
+    ZoneStatus: Object,
+    PageStatus: Object,
     PaConfig: Object,
+    PageID: Number,
     ZoneStatusConfigure: Boolean
   },
   {

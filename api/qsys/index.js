@@ -1,51 +1,43 @@
 import Device from '@/db/models/device'
-async function qsysDataParser(obj) {
-  console.log(obj)
-  const { deviceId, key, data } = obj
-  let curr
-  let r
-  switch (key) {
-    case 'status':
-      r = await Device.updateOne({ deviceId }, { status: data })
-      break
-    case 'zones':
-      // find current data
-      curr = await Device.findOne({ deviceId })
-      // update data
-      if (curr && curr.zones) {
-        let zones = { ...curr.zones }
-        for (let objkey in data) {
-          if (zones[objkey]) {
-            zones[objkey] = { ...zones[objkey], ...data[objkey] }
-          } else {
-            zones[objkey] = data[objkey]
-          }
-          // update db
-        }
-        r = await Device.updateOne({ deviceId }, { zones: zones })
-      } else {
-        // not exist current data
-        r = await Device.updateOne({ deviceId }, { zones: data })
-      }
+import logger from '@/api/logger'
 
-      break
-    case 'ZoneStatusConfigure':
-      r = await Device.updateOne({ deviceId }, { ZoneStatusConfigure: data })
-      break
-    case 'gainAndMute':
-      curr = await Device.findOne({ deviceId })
-      if (curr && curr.zones) {
-        let zones = { ...curr.zones }
-        for (let objkey in data) {
-          zones[objkey] = { ...zones[objkey], ...data.gain[objkey] }
-        }
-        console.log('gain')
-        r = await Device.updateOne({ deviceId }, { zones })
-      }
-    case 'PaConfig':
-      r = await Device.updateOne({ deviceId }, { PaConfig: data })
-      break
+let qsysData
+
+async function qsysDataParser(obj, socket) {
+  console.log(obj)
+  try {
+    const { deviceId, name, ipaddress, value, data } = obj
+    switch (obj.key) {
+      case 'connect':
+        await Device.findOneAndUpdate({ deviceId }, { connected: true })
+        logger.info(
+          `qsys device connected ${name} - ${ipaddress} -- ${deviceId}`
+        )
+        socket.emit(
+          'qsys:data',
+          JSON.stringify({
+            key: 'connect',
+            value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+          })
+        )
+        break
+      case 'disconnect':
+        await Device.findOneAndUpdate({ deviceId }, { connected: false })
+        logger.warn(
+          `qsys device disconnected ${name} - ${ipaddress} -- ${deviceId}`
+        )
+        socket.emit(
+          'qsys:data',
+          JSON.stringify({
+            key: 'devices',
+            value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
+          })
+        )
+        break
+    }
+  } catch (err) {
+    logger.error(`qsys data parser error ${err}`)
   }
 }
 
-export { qsysDataParser }
+export { qsysData, qsysDataParser }
