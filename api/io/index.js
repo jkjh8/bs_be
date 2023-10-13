@@ -1,9 +1,9 @@
 /** @format */
 
-import logger from '@/api/logger'
+import { logInfo, logWarn, logError } from '@/api/logger'
 import Bridge from '@/db/models/bridge'
 import Device from '@/db/models/device'
-import { qsysDataParser } from '../qsys'
+import { qsysDataParser, qsysDeviceSend } from '../qsys'
 import bridgeParser from './bridge'
 
 const initIO = (io) => {
@@ -28,38 +28,20 @@ const initIO = (io) => {
     const passport = session.passport
     // qsys bridge
     if (req.headers.type && req.headers.type === 'qsys') {
-      await Bridge.findOneAndUpdate(
-        { type: 'qsys' },
-        { connected: true, socket: socket.id }
-      )
-      socket.emit(
-        'qsys:data',
-        JSON.stringify({
-          key: 'connect',
-          value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
-        })
-      )
-      logger.info(`Socket.io Q-SYS connected -- ${socket.id}`)
+      await Bridge.findOneAndUpdate({ type: 'qsys' }, { connected: true, socket: socket.id })
+      await qsysDeviceSend(socket, 'connect')
+      logInfo(`Socket.io Q-SYS connected -- ${socket.id}`, 'server', 'socket.io')
     } else {
       // nomal user
-      logger.info(
-        `Socket.io connected -- ${socket.id} ${
-          passport && passport.user.email ? passport.user.email : ''
-        }`
-      )
+      logInfo(`Socket.io connected -- ${socket.id} ${passport && passport.user.email ? passport.user.email : ''}`, 'server', 'socket.io')
     }
     socket.on('disconnect', async (reason) => {
       const req = socket.request
       if (req.headers.type && req.headers.type === 'qsys') {
-        await Bridge.findOneAndUpdate(
-          { type: 'qsys' },
-          { connected: false, socket: null }
-        )
-        return logger.info(`Socket.io disconnected -- ${socket.id} ${reason}`)
+        await Bridge.findOneAndUpdate({ type: 'qsys' }, { connected: false, socket: null })
+        return logWarn(`Socket.io disconnected -- ${socket.id} ${reason}`, 'server', 'socket.io')
       }
-      logger.info(
-        `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`
-      )
+      logWarn(`Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`, 'server', 'socket.io')
     })
 
     socket.on('bridge', (msg) => {
@@ -69,18 +51,8 @@ const initIO = (io) => {
     socket.on('qsys', (msg) => {
       qsysDataParser(JSON.parse(msg), socket)
     })
-
-    socket.on('qsys:devices', async () => {
-      socket.emit(
-        'qsys:data',
-        JSON.stringify({
-          command: 'devices',
-          value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' })
-        })
-      )
-    })
   })
-  logger.info(`init socket.io`)
+  logInfo(`init socket.io`, 'server', 'socket.io')
 }
 
 export { initIO }

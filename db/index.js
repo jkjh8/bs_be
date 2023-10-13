@@ -1,13 +1,13 @@
 /** @format */
 
 import mongoose from 'mongoose'
-import logger from '@/api/logger'
+import { logInfo, logError } from '@/api/logger'
 
 export default async function () {
   try {
     await mongoose.connect('mongodb://mongodb:27017/bs')
-    logger.info('Mongo DB Connected!')
+    logInfo('Mongo DB Connected!', 'server', 'db')
   } catch (err) {
-    logger.error('Mongo DB Connection Error ' + e)
+    logError('Mongo DB Connection Error ' + e, 'server', 'db')
   }
 }

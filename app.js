@@ -20,7 +20,7 @@ import passportConfig from './api/user/passport.js'
 import connectMongoose from './db'
 // loggers
 import loggerWeb from 'morgan'
-import logger from './api/logger/index.js'
+import { logInfo, logError } from './api/logger/index.js'
 // routes
 import indexRouter from './routes/index.js'
 // io routes
@@ -86,10 +86,10 @@ app.use('/', indexRouter)
 // app start server
 try {
   server.listen(3000, () => {
-    logger.info('Web Server Listenning to port 3000')
+    logInfo('Web Server Listenning to port 3000', 'server', 'boot')
   })
 } catch (err) {
-  logger.error('Web Server not opend')
+  logError('Web Server not opend', 'server', 'boot')
 }
 
 // const agent = new https.Agent({

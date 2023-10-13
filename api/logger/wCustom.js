@@ -10,8 +10,12 @@ export default class CustomMongo extends Transport {
     setImmediate(async () => {
       const newLog = new Logs({
         level: info.level,
+        levelNum: info.levelNum,
         message: info.message
       })
+      if (info.source) newLog.source = info.source
+      if (info.category) newLog.category = info.category
+
       await newLog.save()
       this.emit('logged', info)
     })
