@@ -16,7 +16,11 @@ async function qsysDataParser(obj, socket) {
       case 'disconnect':
         await Device.findOneAndUpdate({ deviceId }, { connected: false })
         await qsysDeviceSend(socket, 'devices')
-        logWarn(`qsys device disconnected ${name} - ${ipaddress} -- ${deviceId}`, 'q-sys', 'connect')
+        logWarn(
+          `qsys device disconnected ${name} - ${ipaddress} -- ${deviceId}`,
+          'q-sys',
+          'connect'
+        )
         break
       case 'RtByMethod':
         break
@@ -33,7 +37,10 @@ function qsysSend(socket, key, value) {
 }
 
 async function qsysDeviceSend(socket, key) {
-  socket.emit('qsys:data', JSON.stringify({ key, value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' }) }))
+  socket.emit(
+    'qsys:data',
+    JSON.stringify({ key, value: await Device.find({ 'deviceType.deviceType': 'Q-SYS' }) })
+  )
 }
 
 export { qsysData, qsysDataParser, qsysSend, qsysDeviceSend }
