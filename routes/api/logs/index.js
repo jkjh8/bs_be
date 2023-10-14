@@ -1,7 +1,6 @@
 import express from 'express'
 import Hangul from 'hangul-js'
 import Logs from '@/db/models/logs'
-import Eventlog from '@/db/models/eventlog'
 import { isloggedin } from '@/api/user/isLoggedin'
 
 const router = express.Router()

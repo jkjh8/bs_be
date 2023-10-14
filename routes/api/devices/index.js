@@ -1,7 +1,6 @@
 import express from 'express'
 import Devices from '@/db/models/device'
 import logger from '@/api/logger'
-import { addELog } from '@/api/logger/eventlog'
 
 const router = express.Router()
 
@@ -47,9 +46,7 @@ router.post('/', async (req, res) => {
 
 router.get('/exists', async (req, res) => {
   try {
-    res
-      .status(200)
-      .json({ result: await Devices.exists({ ...req.query.value }) })
+    res.status(200).json({ result: await Devices.exists({ ...req.query.value }) })
   } catch (err) {
     logger.error(`device exists error: ${err}`)
     res.status(500).json({ result: false, error: err })

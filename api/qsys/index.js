@@ -41,7 +41,7 @@ async function qsysDataParser(socket, args) {
         await Device.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
         break
       case 'PaConfig':
-        await Device.findOneAndUpdate({ deviceId }, { PaConfig: zrgs.PaConfig })
+        await Device.findOneAndUpdate({ deviceId }, { PaConfig: args.PaConfig })
         break
       default:
         console.log('qsys parser default: ', args)
