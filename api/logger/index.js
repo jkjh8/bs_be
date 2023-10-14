@@ -1,15 +1,31 @@
 /** @format */
 
 import winston from 'winston'
-import CustomMongo from './wCustom'
+import Transport from 'winston-transport'
+import Logs from '@/db/models/logs'
 import 'winston-mongodb'
 
-import moment from 'moment'
-moment.locale('ko')
+const timezoned = () => {
+  return new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+}
 
+class CustomMongo extends Transport {
+  constructor(opts) {
+    super(opts)
+  }
+
+  log(info, cb) {
+    setImmediate(async () => {
+      await Logs.create({ ...info })
+      this.emit('logged', info)
+    })
+    cb()
+  }
+}
+
+// log config and color
 const config = {
   levels: {
-    // 숫자가 낮을 수록 우선순위가 높습니다.
     error: 0,
     debug: 1,
     warn: 2,
@@ -19,7 +35,6 @@ const config = {
     custom: 6
   },
   colors: {
-    // 각각의 레벨에 대한 색상을 지정해줍니다.
     error: 'red',
     debug: 'blue',
     warn: 'yellow',
@@ -30,22 +45,20 @@ const config = {
   }
 }
 
+// console.log format
 const logFormat = winston.format.printf((info) => {
-  return `${udpateTimeZone(info.timestamp)} ${info.level} ${
-    info.source ? `- ${info.source}` : ''
-  }${info.category ? ` - ${info.category}` : ''} -- ${info.message}`
+  return `${info.timestamp} ${info.level} ${info.source ? `- ${info.source}` : ''}${
+    info.category ? ` - ${info.category}` : ''
+  } -- ${info.message}`
 })
 
-const udpateTimeZone = (time) => {
-  return moment(time).format('LLL')
-}
-
+// logger mongodb
 const logger = winston.createLogger({
   levels: config.levels,
-  transports: [new CustomMongo({ level: 'custom' })]
+  transports: [new CustomMongo()]
 })
 
-// add prodution mode
+// add prodution mode show console.log
 if (process.env.NODE_ENV !== 'production') {
   logger.add(
     new winston.transports.Console({
@@ -53,13 +66,14 @@ if (process.env.NODE_ENV !== 'production') {
       level: 'custom',
       format: winston.format.combine(
         winston.format.colorize({ all: true }),
-        winston.format.timestamp(),
+        winston.format.timestamp({ format: timezoned }),
         logFormat
       )
     })
   )
 }
 
+// logger functions
 function logError(message, source = '', category = '') {
   logger.log({ level: 'error', levelNum: 0, message, source, category })
 }

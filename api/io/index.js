@@ -12,7 +12,7 @@ const initIO = (io) => {
     const session = socket.request.session
     const token = socket.handshake.auth.token
     if (token && (await Bridge({ id: token }))) {
-      console.log('device checked ', token)
+      // console.log('device checked ', token)
       return next()
     }
     if (session && session.passport && session.passport.user) {
@@ -24,24 +24,28 @@ const initIO = (io) => {
 
   io.on('connection', async (socket) => {
     const req = socket.request
-    const session = req.session
-    const passport = session.passport
+    const headers = req.headers
+
     // qsys bridge
-    if (req.headers.type && req.headers.type === 'qsys') {
+    if (headers.type && headers.type === 'qsys') {
       await Bridge.findOneAndUpdate({ type: 'qsys' }, { connected: true, socket: socket.id })
       await qsysDeviceSend(socket, 'connect')
       logInfo(`Socket.io Q-SYS connected -- ${socket.id}`, 'server', 'socket.io')
     } else {
       // nomal user
-      logInfo(`Socket.io connected -- ${socket.id} ${passport && passport.user.email ? passport.user.email : ''}`, 'server', 'socket.io')
+      const email = req.session.passport.user.email
+      logInfo(`Socket.io connected -- ${socket.id} ${email}`, 'server', 'socket.io')
     }
     socket.on('disconnect', async (reason) => {
-      const req = socket.request
-      if (req.headers.type && req.headers.type === 'qsys') {
+      if (headers.type && headers.type === 'qsys') {
         await Bridge.findOneAndUpdate({ type: 'qsys' }, { connected: false, socket: null })
         return logWarn(`Socket.io disconnected -- ${socket.id} ${reason}`, 'server', 'socket.io')
       }
-      logWarn(`Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`, 'server', 'socket.io')
+      logWarn(
+        `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`,
+        'server',
+        'socket.io'
+      )
     })
 
     socket.on('bridge', (msg) => {
@@ -49,10 +53,10 @@ const initIO = (io) => {
     })
 
     socket.on('qsys', (msg) => {
-      qsysDataParser(JSON.parse(msg), socket)
+      qsysDataParser(socket, JSON.parse(msg))
     })
   })
-  logInfo(`init socket.io`, 'server', 'socket.io')
+  logInfo(`Init Socket.io`, 'server', 'socket.io')
 }
 
 export { initIO }
