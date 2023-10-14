@@ -16,13 +16,9 @@ router.get('/', isloggedin, async (req, res, next) => {
       })
     }
     // get count
-    const count = await Logs.countDocuments(
-      searchOptions.length ? { $and: searchOptions } : {}
-    )
+    const count = await Logs.countDocuments(searchOptions.length ? { $and: searchOptions } : {})
     // get docs
-    const current = await Logs.find(
-      searchOptions.length ? { $and: searchOptions } : {}
-    )
+    const current = await Logs.find(searchOptions.length ? { $and: searchOptions } : {})
       .limit(limit)
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 })
@@ -38,20 +34,16 @@ router.get('/', isloggedin, async (req, res, next) => {
 router.get('/eventlog', isloggedin, async (req, res, next) => {
   try {
     const { limit, page, search } = req.query
-    const searchOptions = []
+    const searchOptions = [{ levelNum: { $gt: 2 } }]
     if (search) {
       searchOptions.push({
         search: new RegExp(Hangul.disassembleToString(search), 'i')
       })
     }
     // get count
-    const count = await Eventlog.countDocuments(
-      searchOptions.length ? { $and: searchOptions } : {}
-    )
+    const count = await Logs.countDocuments(searchOptions.length ? { $and: searchOptions } : {})
     // get docs
-    const current = await Eventlog.find(
-      searchOptions.length ? { $and: searchOptions } : {}
-    )
+    const current = await Logs.find(searchOptions.length ? { $and: searchOptions } : {})
       .limit(limit)
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 })

@@ -4,7 +4,7 @@ import passport from 'passport'
 // db models
 import User from '@/db/models/user'
 // local apis
-import logger from '@/api/logger'
+import { logInfo, logWarn, logError } from '@/api/logger'
 
 const router = express.Router()
 
@@ -21,10 +21,10 @@ router.post('/', (req, res, next) => {
     if (!user) return res.status(401).json({ err, info })
     req.login(user, (err) => {
       if (err) {
-        logger.error(`user login faild ${err}`)
+        logError(`user login faild ${err}`, 'server', 'user')
         return next(err)
       }
-      logger.info(`user login success: ${req.user.email}`)
+      logInfo(`user login success: ${req.user.email}`, 'server', 'user')
       return res.status(200).json({ result: true, info })
     })
   })(req, res, next)
@@ -35,16 +35,11 @@ router.post('/signup', async (req, res) => {
     const { userName, userEmail, userPass } = req.body.auth
     const salt = bcrypt.genSaltSync(10)
     const hash = bcrypt.hashSync(userPass, salt)
-    const user = new User({
-      name: userName,
-      email: userEmail,
-      userPassword: hash
-    })
-    await user.save()
-    logger.info(`user singup success: ${user.email}`)
+    await User.create({ name: userName, email: userEmail, userPassword: hash })
+    logInfo(`user singup success: ${userEmail}`, 'server', 'user')
     res.status(200).json({ result: true })
   } catch (err) {
-    logger.error(`user signup error: ${err}`)
+    logError(`user signup error: ${err}`, 'server', 'user')
     res.status(500).json(err)
   }
 })
@@ -55,7 +50,7 @@ router.get('/exists_email', async (req, res) => {
     const r = await User.find({ email: email }, { userPassword: false }).exec()
     res.status(200).json({ result: true, user: r })
   } catch (err) {
-    logger.error(`check dub email error: ${err}`)
+    logError(`check dub email error: ${err}`, 'server', 'user')
     res.status(500).json(err)
   }
 })
@@ -63,7 +58,7 @@ router.get('/exists_email', async (req, res) => {
 router.get('/signout', async (req, res) => {
   req.logout((err) => {
     if (err) {
-      logger.error(`user signout error: ${req.user.email} ${err}`)
+      logWarn(`user signout error: ${req.user.email} ${err}`, 'server', 'user')
       return res.status(500).json({ error: err })
     }
     req.session.destroy()
