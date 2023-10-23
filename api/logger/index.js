@@ -35,21 +35,27 @@ const config = {
     custom: 6
   },
   colors: {
-    error: 'red',
-    debug: 'blue',
-    warn: 'yellow',
-    info: 'green',
-    data: 'magenta',
-    event: 'cyan',
-    custom: 'yellow'
+    error: '\x1b[31m',
+    debug: '\x1b[34m',
+    warn: '\x1b[33m',
+    info: '\x1b[32m',
+    data: '\x1b[35m',
+    event: '\x1b[36m',
+    custom: '\x1b[33m'
   }
 }
 
 // console.log format
-const logFormat = winston.format.printf((info) => {
-  return `${info.timestamp} ${info.level} ${info.source ? `- ${info.source}` : ''}${
-    info.category ? ` - ${info.category}` : ''
-  } -- ${info.message}`
+// const logFormat = winston.format.printf((info) => {
+//   return `${info.timestamp} ${info.level} ${info.source ? `- ${info.source}` : ''}${
+//     info.category ? ` - ${info.category}` : ''
+//   } -- ${info.message}`
+// })
+
+const logFormat = winston.format.printf(({ timestamp, level, message, source, category }) => {
+  return `${
+    config.colors[level] || ''
+  } ${timestamp} ${level} - ${source} ${category} - ${message}\x1b[0m`
 })
 
 // logger mongodb
@@ -64,11 +70,7 @@ if (process.env.NODE_ENV !== 'production') {
     new winston.transports.Console({
       levels: config.levels,
       level: 'custom',
-      format: winston.format.combine(
-        winston.format.colorize({ all: true }),
-        winston.format.timestamp({ format: timezoned }),
-        logFormat
-      )
+      format: winston.format.combine(winston.format.timestamp({ format: timezoned }), logFormat)
     })
   )
 }

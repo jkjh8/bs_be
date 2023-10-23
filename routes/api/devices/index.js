@@ -1,14 +1,18 @@
 import express from 'express'
 import Devices from '@/db/models/device'
+import QSys from '@/db/models/qsys'
 import logger from '@/api/logger'
+import qsys from './qsys'
 
 const router = express.Router()
+
+router.use('/qsys', qsys)
 
 router.get('/', async (req, res) => {
   try {
     res.status(200).json({ result: true, devices: await Devices.find({}) })
   } catch (err) {
-    logger.error(`get devices error: ${err}`)
+    logger.error(`get qsys devices error: ${err}`)
     res.status(500).json({ result: false, error: err })
   }
 })
@@ -45,8 +49,11 @@ router.post('/', async (req, res) => {
 })
 
 router.get('/exists', async (req, res) => {
+  console.log('/exists', req.query)
   try {
-    res.status(200).json({ result: await Devices.exists({ ...req.query.value }) })
+    const qsys = await QSys.exists({ ...req.query.value })
+    console.log(qsys)
+    res.status(200).json({ result: qsys })
   } catch (err) {
     logger.error(`device exists error: ${err}`)
     res.status(500).json({ result: false, error: err })
