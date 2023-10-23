@@ -30,7 +30,7 @@ router.post('/', async (req, res) => {
     await QSys.create({ ...req.body })
     // add event log
     logEvent(
-      `add new qsys device ${req.body.name} ${req.body.ipaddress} ${req.body.deviceId}`,
+      `add new qsys device ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
       req.user.email,
       'qsys'
     )
@@ -55,7 +55,7 @@ router.delete('/', async (req, res) => {
   try {
     const r = await QSys.findByIdAndRemove(req.body._id)
     logEvent(
-      `qsys device removed ${req.body.name} ${req.body.ipaddress} ${req.body.deviceId}`,
+      `qsys device removed ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
       req.user.email,
       'qsys'
     )

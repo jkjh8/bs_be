@@ -12,7 +12,7 @@ async function qsysDataParser(socket, args) {
         await QSys.findOneAndUpdate({ deviceId }, { connected: true })
         await qsysDeviceSend(socket, 'connect')
         logInfo(
-          `qsys device connected ${args.name}-${args.ipaddress}-${args.deviceId}`,
+          `qsys device connected ${args.name}:${args.ipaddress}-${args.deviceId}`,
           'q-sys',
           'connect'
         )
@@ -23,7 +23,7 @@ async function qsysDataParser(socket, args) {
           await QSys.findOneAndUpdate({ deviceId }, { connected: false })
           await qsysDeviceSend(socket, 'devices')
           logWarn(
-            `qsys device disconnected ${args.name}-${args.ipaddress}-${args.deviceId}`,
+            `qsys device disconnected ${args.name}:${args.ipaddress}-${args.deviceId}`,
             'q-sys',
             'connect'
           )
