@@ -1,5 +1,6 @@
 import express from 'express'
 import QSys from '@/db/models/qsys'
+import { qsysDeviceSendBySocketId } from '@/api/qsys'
 import { logError, logEvent } from '@/api/logger'
 
 const router = express.Router()
@@ -34,6 +35,7 @@ router.post('/', async (req, res) => {
       req.user.email,
       'qsys'
     )
+    await qsysDeviceSendBySocketId('devices')
     res.status(200).json({ result: true })
   } catch (err) {
     logError(`qsys add device error: ${err}`)
@@ -59,6 +61,7 @@ router.delete('/', async (req, res) => {
       req.user.email,
       'qsys'
     )
+    await qsysDeviceSendBySocketId('devices')
     res.status(200).json({ result: true, data: r })
   } catch (err) {
     logger.error(`qsys remove device error: ${err}`)

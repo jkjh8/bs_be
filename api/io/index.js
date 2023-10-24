@@ -39,6 +39,7 @@ const initIO = (io) => {
     socket.on('disconnect', async (reason) => {
       if (headers.type && headers.type === 'qsys') {
         await Bridge.findOneAndUpdate({ type: 'qsys' }, { connected: false, socket: null })
+
         return logWarn(`Socket.io disconnected -- ${socket.id} ${reason}`, 'server', 'socket.io')
       }
       logWarn(

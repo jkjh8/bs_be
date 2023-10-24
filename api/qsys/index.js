@@ -1,4 +1,6 @@
 import QSys from '@/db/models/qsys'
+import Bridge from '@/db/models/bridge'
+import { io } from '@/app'
 import { logInfo, logWarn, logError, logDebug } from '@/api/logger'
 
 let qsysData
@@ -62,4 +64,9 @@ async function qsysDeviceSend(socket, key) {
   socket.emit('qsys:data', JSON.stringify({ key, value: await QSys.find({}) }))
 }
 
-export { qsysData, qsysDataParser, qsysSend, qsysDeviceSend }
+async function qsysDeviceSendBySocketId(key) {
+  const bridge = await Bridge.findOne({ type: 'qsys' })
+  console.log(bridge)
+  console.log(io.sockets.sockets.get(bridge.socket))
+}
+export { qsysData, qsysDataParser, qsysSend, qsysDeviceSend, qsysDeviceSendBySocketId }
