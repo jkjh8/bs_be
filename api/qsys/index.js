@@ -2,11 +2,13 @@ import QSys from '@/db/models/qsys'
 import Bridge from '@/db/models/bridge'
 import { io } from '@/app'
 import { logInfo, logWarn, logError, logDebug } from '@/api/logger'
+import qsys from '../../db/models/qsys'
 
 let qsysData
 
 async function qsysDataParser(socket, args) {
   console.log(args)
+  let r
   try {
     const { deviceId, key } = args
     switch (key) {
@@ -20,7 +22,7 @@ async function qsysDataParser(socket, args) {
         )
         break
       case 'disconnect':
-        const r = QSys.findOne({ deviceId })
+        r = QSys.findOne({ deviceId })
         if (r && r.connected) {
           await QSys.findOneAndUpdate({ deviceId }, { connected: false })
           await qsysDeviceSend(socket, 'devices')
@@ -31,22 +33,38 @@ async function qsysDataParser(socket, args) {
           )
         }
         break
-      case 'RtByMethod':
-        const obj = {}
-        if (args.ZoneStatus) {
-          obj.ZoneStatus = args.ZoneStatus
-        }
-        if (args.EngineStatus) {
-          obj.EngineStatus = args.EngineStatus
-        }
-        await QSys.findOneAndUpdate({ deviceId }, { ...obj })
-        logDebug(`Updated from qsys ${deviceId}`, `server`, `data`)
+      case 'ZoneStatus':
+        await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
+        logDebug(`Updated from qsys ${deviceId} ZoneStatus`, `q-sys`, `data`)
         break
       case 'GainAndMute':
         await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
+        logDebug(`Updated from qsys ${deviceId} Gain&Mute`, `q-sys`, `data`)
+        // await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
         break
       case 'PaConfig':
-        await QSys.findOneAndUpdate({ deviceId }, { PaConfig: args.PaConfig })
+        await QSys.findOneAndUpdate({ deviceId }, { PaConfig: args.value })
+        logDebug(`Updated from qsys ${deviceId} PA Config`, `q-sys`, `data`)
+        break
+      case 'ZoneStatusConfigure':
+        await QSys.findOneAndUpdate({ deviceId }, { ZoneStatusConfigure: args.value })
+        logDebug(`Updated from qsys ${deviceId} ZoneStatus Configure updated`, 'q-sys', 'data')
+        break
+      case 'page:message':
+        await QSys.findOneAndUpdate({ deviceId }, { PageID: args.PageID })
+        logDebug(
+          `Q-SYS DeviceID ${deviceId} page:message started pageId ${args.PageID}`,
+          'q-sys',
+          'page'
+        )
+        break
+      case 'page:live':
+        await QSys.findOneAndUpdate({ deviceId }, { PageID: args.PageID })
+        logDebug(
+          `Q-SYS DeviceID ${deviceId} page:live started pageId ${args.PageID}`,
+          'q-sys',
+          'page'
+        )
         break
       default:
         console.log('qsys parser default: ', args)
@@ -66,7 +84,7 @@ async function qsysDeviceSend(socket, key) {
 
 async function qsysDeviceSendBySocketId(key) {
   const bridge = await Bridge.findOne({ type: 'qsys' })
-  console.log(bridge)
-  console.log(io.sockets.sockets.get(bridge.socket))
+  const qsysBridge = io.sockets.sockets.get(bridge.socket)
+  qsysBridge.emit('qsys:data', JSON.stringify({ key, value: await QSys.find({}) }))
 }
 export { qsysData, qsysDataParser, qsysSend, qsysDeviceSend, qsysDeviceSendBySocketId }
