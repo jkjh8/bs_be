@@ -2,6 +2,7 @@ import express from 'express'
 import QSys from '@/db/models/qsys'
 import { qsysDeviceSend } from '@/api/qsys'
 import { logError, logEvent } from '@/api/logger'
+import { io } from '@/app'
 
 const router = express.Router()
 
@@ -44,6 +45,28 @@ router.delete('/', async (req, res) => {
   } catch (err) {
     logger.error(`qsys remove device error: ${err}`)
     res.status(500).json({ result: false, error: err })
+  }
+})
+
+router.put('/volume', (req, res) => {
+  try {
+    const { deviceId, zone, value } = req.body
+    io.emit('qsys:command', JSON.stringify({ deviceId, command: 'changeVol', zone, value}))
+    res.status(200).json({result: "OK"})
+  } catch (err) {
+    logError(`qsys volume change error: ${err}`, 'q-sys', 'event')
+    res.status(500).json({result: false, error: err})
+  }
+})
+
+router.put('/mute', (req, res) => {
+  try {
+    const { deviceId, zone, value} = req.body
+    io.emit('qsys:command', JSON.stringify({ deviceId, command:'changeMute', zone, value}))
+    res.status(200).json({result:"OK"})
+  } catch (error) {
+    logError(`qsys mute change error: ${err}`, 'q-sys', 'event')
+    res.status(500).json({ result: false, error: err})
   }
 })
 

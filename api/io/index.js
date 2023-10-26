@@ -35,6 +35,7 @@ const initIO = (io) => {
     } else {
       // nomal user
       const email = req.session.passport.user.email
+      await qsysDeviceSend('devices')
       logInfo(`Socket.io connected -- ${socket.id} ${email}`, 'server', 'socket.io')
     }
     socket.on('disconnect', async (reason) => {
