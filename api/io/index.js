@@ -23,13 +23,14 @@ const initIO = (io) => {
   })
 
   io.on('connection', async (socket) => {
+    console.log('some device connect')
     const req = socket.request
     const headers = req.headers
 
     // qsys bridge
     if (headers.type && headers.type === 'qsys') {
       await Bridge.findOneAndUpdate({ type: 'qsys' }, { connected: true, socket: socket.id })
-      await qsysDeviceSend(socket, 'connect')
+      await qsysDeviceSend('connect')
       logInfo(`Socket.io Q-SYS connected -- ${socket.id}`, 'server', 'socket.io')
     } else {
       // nomal user
