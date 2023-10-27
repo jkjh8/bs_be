@@ -34,7 +34,7 @@ async function qsysDataParser(socket, args) {
         }
         break
       case 'EngineStatus':
-        await QSys.findOneAndUpdate({ deviceId }, { EngineStatus: args.EngineStatus})
+        await QSys.findOneAndUpdate({ deviceId }, { EngineStatus: args.EngineStatus })
         logDebug(`Updated from qsys ${deviceId} EngineStatus`, 'q-sys', 'data')
         break
       case 'ZoneStatus':
@@ -44,6 +44,10 @@ async function qsysDataParser(socket, args) {
       case 'GainAndMute':
         await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
         logDebug(`Updated from qsys ${deviceId} Gain&Mute`, `q-sys`, `data`)
+        io.emit(
+          'qsys:data',
+          JSON.stringify({ key: 'ZoneStatus', deviceId, ZoneStatus: args.ZoneStatus })
+        )
         // await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
         break
       case 'PaConfig':

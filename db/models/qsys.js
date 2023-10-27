@@ -7,7 +7,20 @@ const qsysSchema = new mongoose.Schema(
     ipaddress: { type: String, unique: true },
     connected: { type: Boolean, default: false },
     EngineStatus: Object,
-    ZoneStatus: Array,
+    ZoneStatus: [
+      {
+        Active: Boolean,
+        Message: String,
+        Priority: Number,
+        PriorityName: String,
+        Squelch: Boolean,
+        Station: Number,
+        Zone: Number,
+        gain: Number,
+        mute: Number,
+        name: String
+      }
+    ],
     PageStatus: Object,
     PaConfig: Object,
     PageID: Number,
