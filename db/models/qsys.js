@@ -18,7 +18,8 @@ const qsysSchema = new mongoose.Schema(
         Zone: Number,
         gain: Number,
         mute: Number,
-        name: String
+        name: String,
+        destination: mongoose.Types.ObjectId
       }
     ],
     PageStatus: Object,

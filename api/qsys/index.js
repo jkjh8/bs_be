@@ -14,7 +14,7 @@ async function qsysDataParser(socket, args) {
     switch (key) {
       case 'connect':
         await QSys.findOneAndUpdate({ deviceId }, { connected: true })
-        await qsysDeviceSend('connect')
+        await sendQsysDevices()
         logInfo(
           `qsys device connected ${args.name}:${args.ipaddress}-${args.deviceId}`,
           'q-sys',
@@ -25,7 +25,7 @@ async function qsysDataParser(socket, args) {
         r = QSys.findOne({ deviceId })
         if (r && r.connected) {
           await QSys.findOneAndUpdate({ deviceId }, { connected: false })
-          await qsysDeviceSend('devices')
+          await sendQsysDevices()
           logWarn(
             `qsys device disconnected ${args.name}:${args.ipaddress}-${args.deviceId}`,
             'q-sys',
@@ -76,7 +76,9 @@ async function qsysDataParser(socket, args) {
         break
       default:
         console.log('qsys parser default: ', args)
+        break
     }
+    sendQsysDevice(deviceId)
   } catch (err) {
     logError(`qsys data parser error ${err}`, 'q-sys', 'data')
   }
@@ -86,8 +88,12 @@ function qsysSend(socket, key, value) {
   socket.emit('qsys:data', JSON.stringify({ key, value }))
 }
 
-async function qsysDeviceSend(key) {
-  io.emit('qsys:data', JSON.stringify({ key, value: await QSys.find({}) }))
+async function sendQsysDevices() {
+  io.emit('qsysDevices', JSON.stringify(await QSys.find({})))
+}
+
+async function sendQsysDevice(deviceId) {
+  io.emit('qsysUpdateDevice', JSON.stringify(await QSys.find({ deviceId })))
 }
 
 async function qsysDeviceSendBySocketId(key) {
@@ -95,4 +101,11 @@ async function qsysDeviceSendBySocketId(key) {
   const qsysBridge = io.sockets.sockets.get(bridge.socket)
   qsysBridge.emit('qsys:data', JSON.stringify({ key, value: await QSys.find({}) }))
 }
-export { qsysData, qsysDataParser, qsysSend, qsysDeviceSend, qsysDeviceSendBySocketId }
+export {
+  qsysData,
+  qsysDataParser,
+  qsysSend,
+  sendQsysDevice,
+  sendQsysDevices,
+  qsysDeviceSendBySocketId
+}
