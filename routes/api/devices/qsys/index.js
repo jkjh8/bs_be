@@ -98,7 +98,7 @@ router.put('/modifiedzonename', async (req, res) => {
     // console.log(await device.save())
     await QSys.findOneAndUpdate(
       { deviceId, 'ZoneStatus.Zone': zone },
-      { 'ZoneStatus.$.name': value }
+      { 'ZoneStatus.$.name': name }
     )
     logDebug(
       `qsys deviceId: ${deviceId} zone name change ${zone}: ${name} by ${req.user.email}`,
