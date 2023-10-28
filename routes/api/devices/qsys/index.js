@@ -48,32 +48,40 @@ router.delete('/', async (req, res) => {
   }
 })
 
-router.put('/volume', (req, res) => {
+router.put('/volume', async (req, res) => {
   try {
     const { deviceId, zone, value } = req.body
+    await QSys.findOneAndUpdate(
+      { deviceId, 'ZoneStatus.Zone': zone },
+      { 'ZoneStatus.$.gain': value }
+    )
     io.emit('qsys:command', JSON.stringify({ deviceId, command: 'changeVol', zone, value }))
     logDebug(
       `qsys deviceId ${deviceId} change volume ${zone}: ${value} by ${req.user.email}`,
       'q-sys',
       'event'
     )
-    res.status(200).json({ result: 'OK' })
+    res.status(200).json({ result: 'OK', device: await QSys.findOne({ deviceId }) })
   } catch (error) {
     logError(`qsys volume change error: ${error}`, 'q-sys', 'event')
     res.status(500).json({ result: false, error })
   }
 })
 
-router.put('/mute', (req, res) => {
+router.put('/mute', async (req, res) => {
   try {
     const { deviceId, zone, value } = req.body
+    await QSys.findOneAndUpdate(
+      { deviceId, 'ZoneStatus.Zone': zone },
+      { 'ZoneStatus.$.mute': value }
+    )
     io.emit('qsys:command', JSON.stringify({ deviceId, command: 'changeMute', zone, value }))
     logDebug(
       `qsys deviceId ${deviceId} change mute ${zone}: ${value} by ${req.user.email}`,
       'q-sys',
       'event'
     )
-    res.status(200).json({ result: 'OK' })
+    res.status(200).json({ result: 'OK', device: await QSys.findOne({ deviceId }) })
   } catch (error) {
     logError(`qsys mute change error: ${error}`, 'q-sys', 'event')
     res.status(500).json({ result: false, error })
@@ -88,6 +96,10 @@ router.put('/modifiedzonename', async (req, res) => {
     // console.log(currentIdx)
     // device.ZoneStatus[currentIdx].name = name
     // console.log(await device.save())
+    await QSys.findOneAndUpdate(
+      { deviceId, 'ZoneStatus.Zone': zone },
+      { 'ZoneStatus.$.name': value }
+    )
     logDebug(
       `qsys deviceId: ${deviceId} zone name change ${zone}: ${name} by ${req.user.email}`,
       'q-sys',
