@@ -91,11 +91,6 @@ router.put('/mute', async (req, res) => {
 router.put('/modifiedzonename', async (req, res) => {
   try {
     const { deviceId, zone, name } = req.body
-    // const device = await QSys.findOne({ deviceId })
-    // const currentIdx = device.ZoneStatus.findIndex((e) => e.Zone === zone)
-    // console.log(currentIdx)
-    // device.ZoneStatus[currentIdx].name = name
-    // console.log(await device.save())
     await QSys.findOneAndUpdate(
       { deviceId, 'ZoneStatus.Zone': zone },
       { 'ZoneStatus.$.name': name }
