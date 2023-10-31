@@ -61,7 +61,7 @@ router.put('/volume', async (req, res) => {
       'q-sys',
       'event'
     )
-    res.status(200).json({ result: 'OK', device: await QSys.findOne({ deviceId }) })
+    res.status(200).json({ result: 'OK', devices: await QSys.find() })
   } catch (error) {
     logError(`qsys volume change error: ${error}`, 'q-sys', 'event')
     res.status(500).json({ result: false, error })
@@ -81,7 +81,7 @@ router.put('/mute', async (req, res) => {
       'q-sys',
       'event'
     )
-    res.status(200).json({ result: 'OK', device: await QSys.findOne({ deviceId }) })
+    res.status(200).json({ result: 'OK', devices: await QSys.find() })
   } catch (error) {
     logError(`qsys mute change error: ${error}`, 'q-sys', 'event')
     res.status(500).json({ result: false, error })
