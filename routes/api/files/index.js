@@ -41,7 +41,19 @@ router.get('/', (req, res) => {
     res.status(200).json({ files: filesWithData })
   } catch (error) {
     logError(`get media files error: ${error}`, 'server', 'files')
-    res.status(500).json({ error })
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.post('/', upload.any(), (req, res) => {
+  try {
+    res.status(200).json({
+      result: 'OK',
+      files: req.file
+    })
+  } catch (error) {
+    logError(`file upload error: ${error}`, 'server', 'files')
+    res.status(500).json({ result: false, error })
   }
 })
 
@@ -56,7 +68,7 @@ router.post('/newfolder', (req, res) => {
     res.status(200).json({ result: 'OK' })
   } catch (error) {
     logError(`make new folder error: ${error}`, 'server', 'files')
-    res.status(500).json({ error })
+    res.status(500).json({ result: false, error })
   }
 })
 
@@ -69,14 +81,18 @@ router.delete('/remove', (req, res) => {
     res.status(200).json({ result: 'OK' })
   } catch (error) {
     logError(`remove folder or file error ${error}`, 'server', 'files')
+    res.status(500).json({ result: false, error })
   }
 })
 
-router.post('/', upload.any(), (req, res) => {
-  res.status(200).json({
-    result: 'OK',
-    files: req.file
-  })
+router.get('/download/:file', (req, res) => {
+  try {
+    const file = JSON.parse(req.params.file)
+    res.download(file.fileFullPath, `${file.base}`)
+  } catch (error) {
+    logError(`file download error: ${error}`)
+    res.status(500).json({ result: false, error })
+  }
 })
 
 export default router
