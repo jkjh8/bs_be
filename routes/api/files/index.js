@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'node:path'
 import fs from 'node:fs'
 import multer from 'multer'
-import { logInfo, logError } from '@/api/logger'
+import { logInfo, logError, logDebug } from '@/api/logger'
 
 const router = express.Router()
 
@@ -47,6 +47,13 @@ router.get('/', (req, res) => {
 
 router.post('/', upload.any(), (req, res) => {
   try {
+    logInfo(
+      `file uploaded successfully name: ${req.file.fieldname.toString('utf8')} by ${
+        req.user.email
+      }`,
+      'server',
+      'files'
+    )
     res.status(200).json({
       result: 'OK',
       files: req.file
@@ -77,6 +84,11 @@ router.delete('/remove', (req, res) => {
     const { fileFullPath } = req.body
     if (fs.existsSync(fileFullPath)) {
       fs.rmSync(fileFullPath, { recursive: true })
+      logInfo(
+        `removed file or folder path: ${fileFullPath} by ${req.user.email}`,
+        'server',
+        'files'
+      )
     }
     res.status(200).json({ result: 'OK' })
   } catch (error) {
@@ -89,8 +101,24 @@ router.get('/download/:file', (req, res) => {
   try {
     const file = JSON.parse(req.params.file)
     res.download(file.fileFullPath, `${file.base}`)
+    logDebug(`Download file ${file.base} to ${req.user.email}`, 'server', 'files')
   } catch (error) {
     logError(`file download error: ${error}`)
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.put('/rename', (req, res) => {
+  try {
+    const { oldName, newName } = req.body
+    fs.renameSync(oldName, newName)
+    logInfo(
+      `file or folder renamed ${oldName} to ${newName} by ${req.user.email}`,
+      'server',
+      'files'
+    )
+  } catch (error) {
+    logError(`rename file or folder failed by ${req.user.email} ${error}`)
     res.status(500).json({ result: false, error })
   }
 })
