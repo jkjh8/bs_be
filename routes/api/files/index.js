@@ -14,7 +14,11 @@ const storage = multer.diskStorage({
     cb(null, path.resolve(mediaPath, folders))
   },
   filename: (req, file, cb) => {
-    console.log(file)
+    logInfo(
+      `file uploaded successfully name: ${file.fieldname.toString('utf8')}`,
+      'server',
+      'files'
+    )
     cb(null, file.fieldname.toString('utf8'))
   }
 })
@@ -47,16 +51,8 @@ router.get('/', (req, res) => {
 
 router.post('/', upload.any(), (req, res) => {
   try {
-    logInfo(
-      `file uploaded successfully name: ${req.file.fieldname.toString('utf8')} by ${
-        req.user.email
-      }`,
-      'server',
-      'files'
-    )
     res.status(200).json({
-      result: 'OK',
-      files: req.file
+      result: 'OK'
     })
   } catch (error) {
     logError(`file upload error: ${error}`, 'server', 'files')
@@ -117,6 +113,7 @@ router.put('/rename', (req, res) => {
       'server',
       'files'
     )
+    res.status(200).json({ result: 'OK' })
   } catch (error) {
     logError(`rename file or folder failed by ${req.user.email} ${error}`)
     res.status(500).json({ result: false, error })
