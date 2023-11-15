@@ -40,6 +40,10 @@ async function qsysDataParser(socket, args) {
       case 'ZoneStatus':
         await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
         logDebug(`Updated from qsys ${deviceId} ZoneStatus`, `q-sys`, `data`)
+        io.emit(
+          'qsys:data',
+          JSON.stringify({ key: 'ZoneStatus', deviceId, ZoneStatus: args.ZoneStatus })
+        )
         break
       case 'GainAndMute':
         await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: args.ZoneStatus })
