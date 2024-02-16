@@ -27,6 +27,7 @@ import indexRouter from './routes/index.js'
 // import { initUserinterfaceIo } from './api/io/usrInterface.js'
 // import { initDeviceIo } from './api/io/hwBridge'
 import { initIO } from './api/io'
+import { connectTcpServer } from './api/tcp'
 
 // mongoose connected
 connectMongoose()
@@ -111,5 +112,7 @@ try {
 //     console.error(e)
 //   })
 
+// tcp server opon 
+connectTcpServer()
 export default app
 export { io }
