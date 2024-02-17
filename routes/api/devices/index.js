@@ -3,10 +3,12 @@ import Devices from '@/db/models/device'
 import QSys from '@/db/models/qsys'
 import logger from '@/api/logger'
 import qsys from './qsys'
+import barix from './barix'
 
 const router = express.Router()
 
 router.use('/qsys', qsys)
+router.use('/barix', barix)
 
 router.get('/', async (req, res) => {
   try {

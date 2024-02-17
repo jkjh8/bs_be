@@ -27,7 +27,7 @@ import indexRouter from './routes/index.js'
 // import { initUserinterfaceIo } from './api/io/usrInterface.js'
 // import { initDeviceIo } from './api/io/hwBridge'
 import { initIO } from './api/io'
-import { connectTcpServer } from './api/tcp'
+import { connectTcpServer } from './api/tcpQsys'
 
 // mongoose connected
 connectMongoose()
