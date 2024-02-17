@@ -7,11 +7,21 @@ export default async function tcpcommands(commands) {
     const {comm, value} = JSON.parse(commands)
     switch(comm) {
       case 'qsys:get':
-        writeTcpSockets({comm: 'qsys:devices', value:await QSys.find()})
+        qsysDeviceListSendByTcp()
       break
     }
 
   } catch (error) {
-    
+    logError(`tcp commands error - ${error}`, 'server', 'q-sys')
   }
 }
+
+async function qsysDeviceListSendByTcp() {
+  try {
+    writeTcpSockets({comm: 'qsys:devices', value: await QSys.find()})
+  } catch (error) {
+    logError(`Qsys device list send by tcp error - ${error}`)
+  }
+}
+
+export { qsysDeviceListSendByTcp }

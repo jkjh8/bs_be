@@ -11,7 +11,7 @@ function connectTcpServer() {
 
     sockets.push(socket)
     socket.on('close', () => {
-      logWarn(`TCP Socket disconnected - ${socket.remoteAddress}, ${socket.remotePort}`)
+      logWarn(`TCP Socket disconnected - ${socket.remoteAddress}, ${socket.remotePort}`, 'server', 'hardware')
       for (let i = 0; i < sockets.length; i++) {
         if (sockets[i] === socket) {
           sockets.splice(i, 1)
@@ -20,7 +20,9 @@ function connectTcpServer() {
     })
     socket.on('data', (data) => {
       console.log(`TCP Server data on - ${data}`)
+      // for tcp commands
       tcpCommands(data)
+      //
     })
     socket.on('error', (error) => {
       logError(`TCP Server error - ${error}`)
@@ -29,7 +31,7 @@ function connectTcpServer() {
   })
 
   tcpServer.listen(2990, '127.0.0.1', () => {
-    logInfo(`TCP Server listening on 2990`)
+    logInfo(`TCP Server listening on 2990`, 'server', 'hardware')
   })
 }
 
