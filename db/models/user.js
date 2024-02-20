@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema(
     level: { type: Number, default: 0 },
     zones: { type: Array },
     numberOfLogins: { type: Number, default: 0 },
-    loginAt: { type: Date, default: new Date() }
+    loginAt: { type: Date, default: new Date() },
+    folder: { type: String }
   },
   {
     timestamps: true

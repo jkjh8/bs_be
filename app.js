@@ -29,6 +29,9 @@ import indexRouter from './routes/index.js'
 import { initIO } from './api/io'
 import { connectTcpServer } from './api/tcpQsys'
 
+// files
+import { getDirs } from './api/files/index.js'
+
 // mongoose connected
 connectMongoose()
 
@@ -114,5 +117,10 @@ try {
 
 // tcp server opon 
 connectTcpServer()
+
+let folders = getDirs(path.resolve(__dirname, 'media'))
+console.log(folders)
+console.log(folders[0])
+
 export default app
 export { io }
