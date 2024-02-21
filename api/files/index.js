@@ -11,4 +11,10 @@ const getDirs = (dir) =>
     return files
   }, [])
 
-export { getDirs }
+const chkFolder = (folder) => {
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder, { recursive: true })
+  }
+}
+
+export { getDirs, chkFolder }

@@ -5,6 +5,7 @@ import passport from 'passport'
 import User from '@/db/models/user'
 // local apis
 import { logInfo, logWarn, logError } from '@/api/logger'
+import makeUniqueId from '../../../api/uniqueId'
 
 const router = express.Router()
 
@@ -35,7 +36,7 @@ router.post('/signup', async (req, res) => {
     const { userName, userEmail, userPass } = req.body.auth
     const salt = bcrypt.genSaltSync(10)
     const hash = bcrypt.hashSync(userPass, salt)
-    await User.create({ name: userName, email: userEmail, userPassword: hash })
+    await User.create({ name: userName, email: userEmail, userPassword: hash, folder: makeUniqueId(12) })
     logInfo(`user singup success: ${userEmail}`, 'server', 'user')
     res.status(200).json({ result: true })
   } catch (err) {

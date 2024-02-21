@@ -2,6 +2,7 @@ import express from 'express'
 import path from 'node:path'
 import fs from 'node:fs'
 import multer from 'multer'
+import { getDirs, chkFolder } from '@/api/files'
 import { logInfo, logError, logDebug } from '@/api/logger'
 
 const router = express.Router()
@@ -58,6 +59,29 @@ router.post('/', upload.any(), (req, res) => {
     logError(`file upload error: ${error}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
+})
+
+// folders
+router.get('/dir', (req, res) => {
+  try {
+    const {email} = req.user
+    const globalFolder = path.resolve(mediaPath, 'global')
+    const globalFolders = getDirs(globalFolder)
+    const userFolder = path.resolve(mediaPath, email)
+    chkFolder(userFolder)
+    const userFolders = getDirs(userFolder)
+    res.status(200).json([{
+      label: '공용폴더',
+      path: globalFolder,
+      children: globalFolders}, {
+        label: '사용자폴더',
+        path: userFolder ?? '',
+        children: userFolders ?? []
+      }])
+  } catch (error) {
+    logError(`file get dir error: ${error}`, 'server', 'files')
+  }
+
 })
 
 router.post('/newfolder', (req, res) => {
