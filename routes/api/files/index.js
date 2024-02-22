@@ -11,8 +11,8 @@ const mediaPath = path.resolve(__dirname, '../../../media')
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const { folders } = req.headers
-    cb(null, path.resolve(mediaPath, folders))
+    const { folder } = req.headers
+    cb(null, decodeURIComponent(folder))
   },
   filename: (req, file, cb) => {
     logInfo(
@@ -28,19 +28,18 @@ const upload = multer({ storage: storage })
 
 router.get('/', (req, res) => {
   try {
-    const currentFolder = path.resolve(mediaPath, req.query.folders)
-    const currentFiles = fs.readdirSync(currentFolder)
+    const { folder } = req.query
+    const files = fs.readdirSync(folder)
     let filesWithData = []
-    for (let i = 0; i < currentFiles.length; i++) {
-      let file = currentFiles[i]
-      let fileFullPath = path.resolve(currentFolder, file)
-      let parse = path.parse(fileFullPath)
-      let stat = fs.statSync(fileFullPath)
+    for (let i = 0; i < files.length; i++) {
+      let fullpath = path.resolve(folder, files[i])
+      let stat = fs.statSync(fullpath)
       filesWithData.push({
-        fileFullPath,
-        ...parse,
-        type: stat.isDirectory() ? 'folder' : parse.ext.replace('.', ''),
-        size: stat.size
+        fullpath,
+        ...path.parse(fullpath),
+        type: stat.isDirectory() ? 'folder' : 'file',
+        size: stat.size,
+        root: false
       })
     }
     res.status(200).json({ files: filesWithData })
@@ -70,14 +69,18 @@ router.get('/dir', (req, res) => {
     const userFolder = path.resolve(mediaPath, email)
     chkFolder(userFolder)
     const userFolders = getDirs(userFolder)
-    res.status(200).json([{
+    res.status(200).json({folders: [{
       label: '공용폴더',
       path: globalFolder,
-      children: globalFolders}, {
+      root: true,
+      children: globalFolders
+    },
+    {
         label: '사용자폴더',
         path: userFolder ?? '',
+        root: true,
         children: userFolders ?? []
-      }])
+    }], globalFolder, userFolder})
   } catch (error) {
     logError(`file get dir error: ${error}`, 'server', 'files')
   }
@@ -86,8 +89,8 @@ router.get('/dir', (req, res) => {
 
 router.post('/newfolder', (req, res) => {
   try {
-    const { folders, name } = req.body
-    const newFolder = path.resolve(mediaPath, folders ? folders : '', name)
+    const { folder, name } = req.body
+    const newFolder = path.resolve(folder, name)
     if (!fs.existsSync(newFolder)) {
       fs.mkdirSync(newFolder)
     }
