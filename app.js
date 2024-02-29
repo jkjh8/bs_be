@@ -30,7 +30,7 @@ import { initIO } from './api/io'
 import { connectTcpServer } from './api/tcpQsys'
 
 // files
-import { getDirs } from './api/files/index.js'
+import { getDirs, chkFolder } from './api/files/index.js'
 
 // mongoose connected
 connectMongoose()
@@ -65,7 +65,18 @@ io.engine.use(sessionMiddleware)
 initIO(io)
 
 // static
+const defaultPath = path.resolve(__dirname)
+const mediaFolder = path.resolve(defaultPath, 'media')
+const tempFolder = path.resolve(mediaFolder, 'temp')
+chkFolder(mediaFolder)
+chkFolder(tempFolder)
+
+global.defaultPath = defaultPath
+global.mediaFolder = mediaFolder
+global.tempFolder = tempFolder
+
 app.use(express.static(path.resolve(__dirname, 'public', 'spa')))
+app.use('/media', express.static(mediaFolder))
 
 /************************ routes ************************/
 app.use('/', indexRouter)
@@ -115,12 +126,8 @@ try {
 //     console.error(e)
 //   })
 
-// tcp server opon 
+// tcp server opon
 connectTcpServer()
-
-let folders = getDirs(path.resolve(__dirname, 'media'))
-console.log(folders)
-console.log(folders[0])
 
 export default app
 export { io }

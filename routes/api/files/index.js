@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import multer from 'multer'
 import { getDirs, chkFolder } from '@/api/files'
 import { logInfo, logError, logDebug } from '@/api/logger'
+import ziper from './zip'
 
 const router = express.Router()
 
@@ -36,6 +37,7 @@ router.get('/', (req, res) => {
       let stat = fs.statSync(fullpath)
       filesWithData.push({
         fullpath,
+        path: fullpath.replace(mediaFolder, ''),
         ...path.parse(fullpath),
         type: stat.isDirectory() ? 'folder' : 'file',
         size: stat.size,
@@ -63,28 +65,37 @@ router.post('/', upload.any(), (req, res) => {
 // folders
 router.get('/dir', (req, res) => {
   try {
-    const {email} = req.user
+    const { email } = req.user
+    let folders = []
+    let userFolder
+    // global folders
     const globalFolder = path.resolve(mediaPath, 'global')
     const globalFolders = getDirs(globalFolder)
-    const userFolder = path.resolve(mediaPath, email)
-    chkFolder(userFolder)
-    const userFolders = getDirs(userFolder)
-    res.status(200).json({folders: [{
+    folders.push({
       label: '공용폴더',
       path: globalFolder,
       root: true,
       children: globalFolders
-    },
-    {
+    })
+    // user folders
+    if (email) {
+      userFolder = path.resolve(mediaPath, email)
+      // exists and make folder
+      chkFolder(userFolder)
+      const userFolders = getDirs(userFolder)
+      folders.push({
         label: '사용자폴더',
-        path: userFolder ?? '',
+        path: userFolder,
         root: true,
-        children: userFolders ?? []
-    }], globalFolder, userFolder})
+        children: userFolders
+      })
+    }
+    res
+      .status(200)
+      .json({ folders, globalFolder, userFolder: userFolder ? userFolder : '' })
   } catch (error) {
     logError(`file get dir error: ${error}`, 'server', 'files')
   }
-
 })
 
 router.post('/newfolder', (req, res) => {
@@ -102,17 +113,26 @@ router.post('/newfolder', (req, res) => {
   }
 })
 
-router.delete('/remove', (req, res) => {
+router.delete('/', (req, res) => {
   try {
-    const { fileFullPath } = req.body
-    if (fs.existsSync(fileFullPath)) {
-      fs.rmSync(fileFullPath, { recursive: true })
-      logInfo(
-        `removed file or folder path: ${fileFullPath} by ${req.user.email}`,
-        'server',
-        'files'
-      )
+    const { files } = req.body
+    console.log(files)
+    for (let file of files) {
+      if (fs.existsSync(file.fullpath)) {
+        if (file.type === 'folder') {
+          fs.rmdirSync(file.fullpath, { recursive: true })
+        } else {
+          fs.unlinkSync(file.fullpath)
+        }
+      }
     }
+    logInfo(
+      `removed file or folder path: ${files.map((item) => item.base)} by ${
+        req.user.email
+      }`,
+      'server',
+      'files'
+    )
     res.status(200).json({ result: 'OK' })
   } catch (error) {
     logError(`remove folder or file error ${error}`, 'server', 'files')
@@ -120,11 +140,9 @@ router.delete('/remove', (req, res) => {
   }
 })
 
-router.get('/download/:file', (req, res) => {
+router.get('/download', async (req, res) => {
   try {
-    const file = JSON.parse(req.params.file)
-    res.download(file.fileFullPath, `${file.base}`)
-    logDebug(`Download file ${file.base} to ${req.user.email}`, 'server', 'files')
+    res.download(await ziper(JSON.parse(req.query.files)))
   } catch (error) {
     logError(`file download error: ${error}`)
     res.status(500).json({ result: false, error })
