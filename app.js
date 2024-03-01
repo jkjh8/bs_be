@@ -30,7 +30,7 @@ import { initIO } from './api/io'
 import { connectTcpServer } from './api/tcpQsys'
 
 // files
-import { getDirs, chkFolder } from './api/files/index.js'
+import { chkMakeFolder } from './api/files/index.js'
 
 // mongoose connected
 connectMongoose()
@@ -67,12 +67,15 @@ initIO(io)
 // static
 const defaultPath = path.resolve(__dirname)
 const mediaFolder = path.resolve(defaultPath, 'media')
+const globalFolder = path.resolve(mediaFolder, 'global')
 const tempFolder = path.resolve(mediaFolder, 'temp')
-chkFolder(mediaFolder)
-chkFolder(tempFolder)
+chkMakeFolder(mediaFolder)
+chkMakeFolder(globalFolder)
+chkMakeFolder(tempFolder)
 
 global.defaultPath = defaultPath
 global.mediaFolder = mediaFolder
+global.globalFolder = globalFolder
 global.tempFolder = tempFolder
 
 app.use(express.static(path.resolve(__dirname, 'public', 'spa')))

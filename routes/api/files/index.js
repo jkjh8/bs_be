@@ -1,50 +1,19 @@
 import express from 'express'
 import path from 'node:path'
 import fs from 'node:fs'
-import multer from 'multer'
-import { getDirs, chkFolder } from '@/api/files'
+import { isAdmin } from '../../../api/user/isLoggedin'
+import upload from './uploader'
+
+import { chkMakeFolder, getFolders, getFiles, getFolderSize } from '@/api/files'
 import { logInfo, logError, logDebug } from '@/api/logger'
 import ziper from './zip'
 
 const router = express.Router()
 
-const mediaPath = path.resolve(__dirname, '../../../media')
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const { folder } = req.headers
-    cb(null, decodeURIComponent(folder))
-  },
-  filename: (req, file, cb) => {
-    logInfo(
-      `file uploaded successfully name: ${file.fieldname.toString('utf8')}`,
-      'server',
-      'files'
-    )
-    cb(null, file.fieldname.toString('utf8'))
-  }
-})
-
-const upload = multer({ storage: storage })
-
 router.get('/', (req, res) => {
   try {
     const { folder } = req.query
-    const files = fs.readdirSync(folder)
-    let filesWithData = []
-    for (let i = 0; i < files.length; i++) {
-      let fullpath = path.resolve(folder, files[i])
-      let stat = fs.statSync(fullpath)
-      filesWithData.push({
-        fullpath,
-        path: fullpath.replace(mediaFolder, ''),
-        ...path.parse(fullpath),
-        type: stat.isDirectory() ? 'folder' : 'file',
-        size: stat.size,
-        root: false
-      })
-    }
-    res.status(200).json({ files: filesWithData })
+    res.status(200).json({ files: getFiles(folder) })
   } catch (error) {
     logError(`get media files error: ${error}`, 'server', 'files')
     res.status(500).json({ result: false, error })
@@ -66,33 +35,7 @@ router.post('/', upload.any(), (req, res) => {
 router.get('/dir', (req, res) => {
   try {
     const { email } = req.user
-    let folders = []
-    let userFolder
-    // global folders
-    const globalFolder = path.resolve(mediaPath, 'global')
-    const globalFolders = getDirs(globalFolder)
-    folders.push({
-      label: '공용폴더',
-      path: globalFolder,
-      root: true,
-      children: globalFolders
-    })
-    // user folders
-    if (email) {
-      userFolder = path.resolve(mediaPath, email)
-      // exists and make folder
-      chkFolder(userFolder)
-      const userFolders = getDirs(userFolder)
-      folders.push({
-        label: '사용자폴더',
-        path: userFolder,
-        root: true,
-        children: userFolders
-      })
-    }
-    res
-      .status(200)
-      .json({ folders, globalFolder, userFolder: userFolder ? userFolder : '' })
+    res.status(200).json(getFolders(email))
   } catch (error) {
     logError(`file get dir error: ${error}`, 'server', 'files')
   }
@@ -101,10 +44,7 @@ router.get('/dir', (req, res) => {
 router.post('/newfolder', (req, res) => {
   try {
     const { folder, name } = req.body
-    const newFolder = path.resolve(folder, name)
-    if (!fs.existsSync(newFolder)) {
-      fs.mkdirSync(newFolder)
-    }
+    chkMakeFolder(path.resolve(folder, name))
     logInfo(`make new folder ${name} by ${req.user.email}`, 'server', 'files')
     res.status(200).json({ result: 'OK' })
   } catch (error) {
@@ -116,7 +56,6 @@ router.post('/newfolder', (req, res) => {
 router.delete('/', (req, res) => {
   try {
     const { files } = req.body
-    console.log(files)
     for (let file of files) {
       if (fs.existsSync(file.fullpath)) {
         if (file.type === 'folder') {
@@ -136,6 +75,26 @@ router.delete('/', (req, res) => {
     res.status(200).json({ result: 'OK' })
   } catch (error) {
     logError(`remove folder or file error ${error}`, 'server', 'files')
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.delete('/temp', isAdmin, (req, res) => {
+  try {
+    const files = fs.readdirSync(tempFolder)
+    for (let i = 0; i < files.length; i++) {
+      const filePath = path.join(tempFolder, files[i])
+      const stats = fs.statSync(filePath)
+      if (stats.isDirectory()) {
+        fs.rmdirSync(filePath, { recursive: true })
+      } else {
+        fs.unlinkSync(filePath)
+      }
+    }
+    logInfo(`removed temp folder by ${req.user.email}`, 'server', 'files')
+    res.status(200).json({ result: 'OK' })
+  } catch (error) {
+    logError(`remove temp foler error ${error}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
 })
@@ -161,6 +120,28 @@ router.put('/rename', (req, res) => {
     res.status(200).json({ result: 'OK' })
   } catch (error) {
     logError(`rename file or folder failed by ${req.user.email} ${error}`)
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.get('/size', (req, res) => {
+  try {
+    const { fullpath } = req.query
+    if (fullpath === 'temp') {
+      return res
+        .status(200)
+        .json({ result: true, size: getFolderSize(tempFolder) })
+    }
+    if (fs.existsSync(fullpath)) {
+      return res
+        .status(200)
+        .json({ result: true, size: getFolderSize(fullpath) })
+    }
+    res
+      .status(200)
+      .json({ result: false, size: 0, message: 'file or folder not exists' })
+  } catch (error) {
+    logError(`file or Folder check size error ${fullpath}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
 })
