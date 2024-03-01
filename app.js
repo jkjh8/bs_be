@@ -18,6 +18,7 @@ import passport from 'passport'
 import passportConfig from './api/user/passport.js'
 // db
 import connectMongoose from './db'
+import Setup from './db/models/setup.js'
 // loggers
 import loggerWeb from 'morgan'
 import { logInfo, logError } from './api/logger/index.js'
@@ -73,11 +74,6 @@ chkMakeFolder(mediaFolder)
 chkMakeFolder(globalFolder)
 chkMakeFolder(tempFolder)
 
-global.defaultPath = defaultPath
-global.mediaFolder = mediaFolder
-global.globalFolder = globalFolder
-global.tempFolder = tempFolder
-
 app.use(express.static(path.resolve(__dirname, 'public', 'spa')))
 app.use('/media', express.static(mediaFolder))
 
@@ -132,5 +128,19 @@ try {
 // tcp server opon
 connectTcpServer()
 
+// global variables
+global.defaultPath = defaultPath
+global.mediaFolder = mediaFolder
+global.globalFolder = globalFolder
+global.tempFolder = tempFolder
+
+Setup.findOne({ key: 'ttsAddr' })
+  .then((docs) => {
+    global.ttsAddr = docs.ipaddress
+  })
+  .catch((err) => {
+    logError(`get tts address to global error ${err}`)
+    global.ttsAddr = ''
+  })
 export default app
 export { io }
