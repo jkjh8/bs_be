@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const qsysSchema = new mongoose.Schema(
   {
     name: String,
+    index: Number,
     deviceId: { type: String, unique: true },
     ipaddress: { type: String, unique: true },
     connected: { type: Boolean, default: false },
