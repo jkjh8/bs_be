@@ -74,4 +74,24 @@ function getFolderSize(folder) {
   return size
 }
 
-export { getDirs, chkMakeFolder, getFolders, getFiles, getFolderSize }
+function deleteTempFolder() {
+  const files = fs.readdirSync(tempFolder)
+  for (let i = 0; i < files.length; i++) {
+    const filePath = path.join(tempFolder, files[i])
+    const stats = fs.statSync(filePath)
+    if (stats.isDirectory()) {
+      fs.rmdirSync(filePath, { recursive: true })
+    } else {
+      fs.unlinkSync(filePath)
+    }
+  }
+}
+
+export {
+  getDirs,
+  chkMakeFolder,
+  getFolders,
+  getFiles,
+  getFolderSize,
+  deleteTempFolder
+}

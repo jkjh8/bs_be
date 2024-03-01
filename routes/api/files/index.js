@@ -4,7 +4,13 @@ import fs from 'node:fs'
 import { isAdmin } from '../../../api/user/isLoggedin'
 import upload from './uploader'
 
-import { chkMakeFolder, getFolders, getFiles, getFolderSize } from '@/api/files'
+import {
+  chkMakeFolder,
+  getFolders,
+  getFiles,
+  getFolderSize,
+  deleteTempFolder
+} from '@/api/files'
 import { logInfo, logError, logDebug } from '@/api/logger'
 import ziper from './zip'
 
@@ -81,16 +87,7 @@ router.delete('/', (req, res) => {
 
 router.delete('/temp', isAdmin, (req, res) => {
   try {
-    const files = fs.readdirSync(tempFolder)
-    for (let i = 0; i < files.length; i++) {
-      const filePath = path.join(tempFolder, files[i])
-      const stats = fs.statSync(filePath)
-      if (stats.isDirectory()) {
-        fs.rmdirSync(filePath, { recursive: true })
-      } else {
-        fs.unlinkSync(filePath)
-      }
-    }
+    deleteTempFolder()
     logInfo(`removed temp folder by ${req.user.email}`, 'server', 'files')
     res.status(200).json({ result: 'OK' })
   } catch (error) {
