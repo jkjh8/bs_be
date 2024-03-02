@@ -1,14 +1,12 @@
 /** @format */
 
 import path from 'path'
-import fs from 'fs'
-import axios from 'axios'
 import https from 'https'
 // http
 import http from 'http'
 import { Server } from 'socket.io'
 import createError from 'http-errors'
-import express, { application, json } from 'express'
+import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import corsOptions from './api/cors.js'
@@ -25,13 +23,14 @@ import { logInfo, logError } from './api/logger/index.js'
 // routes
 import indexRouter from './routes/index.js'
 // io routes
-// import { initUserinterfaceIo } from './api/io/usrInterface.js'
-// import { initDeviceIo } from './api/io/hwBridge'
 import { initIO } from './api/io'
 import { connectTcpServer } from './api/tcpQsys'
 
 // files
-import { chkMakeFolder } from './api/files/index.js'
+import initFolders from './system/setFolder.js'
+
+// setup
+import initSetup from './system/initSetup.js'
 
 // mongoose connected
 connectMongoose()
@@ -66,17 +65,9 @@ io.engine.use(sessionMiddleware)
 initIO(io)
 
 // static
-const defaultPath = path.resolve(__dirname)
-const mediaFolder = path.resolve(defaultPath, 'media')
-const globalFolder = path.resolve(mediaFolder, 'global')
-const tempFolder = path.resolve(mediaFolder, 'temp')
-chkMakeFolder(mediaFolder)
-chkMakeFolder(globalFolder)
-chkMakeFolder(tempFolder)
-
+initFolders(app)
 app.use(express.static(path.resolve(__dirname, 'public', 'spa')))
-app.use('/media', express.static(mediaFolder))
-
+app.use('/media', express.static(mediaPath.media))
 /************************ routes ************************/
 app.use('/', indexRouter)
 
@@ -106,41 +97,15 @@ try {
   logError('Web Server not opend', 'server', 'boot')
 }
 
-// const agent = new https.Agent({
-//   rejectUnauthorized: false
-// })
-// axios
-//   .post(
-//     'https://192.168.1.150/api/v0/logon',
-//     {
-//       username: 'admin',
-//       password: 'password'
-//     },
-//     { httpsAgent: agent }
-//   )
-//   .then((res) => {
-//     console.log(res)
-//   })
-//   .catch((e) => {
-//     console.error(e)
-//   })
-
-// tcp server opon
-connectTcpServer()
-
 // global variables
-global.defaultPath = defaultPath
-global.mediaFolder = mediaFolder
-global.globalFolder = globalFolder
-global.tempFolder = tempFolder
 
-Setup.findOne({ key: 'ttsAddr' })
-  .then((docs) => {
-    global.ttsAddr = docs.ipaddress
-  })
-  .catch((err) => {
-    logError(`get tts address to global error ${err}`)
-    global.ttsAddr = ''
-  })
+global.sStatus = {
+  ttsAddress: 'http://127.0.0.1:9998',
+  tcpServerPort: 9997,
+  tcpServerStatus: false
+}
+
+// get setup data from db
+initSetup()
 export default app
 export { io }

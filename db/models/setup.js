@@ -2,11 +2,10 @@ import mongoose from 'mongoose'
 
 const setupSchema = new mongoose.Schema(
   {
-    type: String,
     key: String,
-    ipaddress: String,
-    port: Number,
-    value: String
+    value: String,
+    valueNum: Number,
+    valueBoolean: Boolean
   },
   {
     timestamps: true

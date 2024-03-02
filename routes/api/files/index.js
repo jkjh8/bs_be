@@ -127,7 +127,7 @@ router.get('/size', (req, res) => {
     if (fullpath === 'temp') {
       return res
         .status(200)
-        .json({ result: true, size: getFolderSize(tempFolder) })
+        .json({ result: true, size: getFolderSize(mediaPath.temp) })
     }
     if (fs.existsSync(fullpath)) {
       return res

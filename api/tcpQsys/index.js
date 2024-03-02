@@ -5,13 +5,17 @@ import tcpCommands from './functions'
 let tcpServer
 const sockets = []
 
-function connectTcpServer() {
+function connectTcpServer(port) {
   tcpServer = net.createServer((socket) => {
     socket.setEncoding('utf8')
 
     sockets.push(socket)
     socket.on('close', () => {
-      logWarn(`TCP Socket disconnected - ${socket.remoteAddress}, ${socket.remotePort}`, 'server', 'hardware')
+      logWarn(
+        `TCP Socket disconnected - ${socket.remoteAddress}, ${socket.remotePort}`,
+        'server',
+        'hardware'
+      )
       for (let i = 0; i < sockets.length; i++) {
         if (sockets[i] === socket) {
           sockets.splice(i, 1)
@@ -27,18 +31,20 @@ function connectTcpServer() {
     socket.on('error', (error) => {
       logError(`TCP Server error - ${error}`)
     })
-    logInfo(`Tcp Socket connected - ${socket.remoteAddress}, ${socket.remotePort}`)
+    logInfo(
+      `Tcp Socket connected - ${socket.remoteAddress}, ${socket.remotePort}`
+    )
   })
 
-  tcpServer.listen(2990, '127.0.0.1', () => {
-    logInfo(`TCP Server listening on 2990`, 'server', 'hardware')
+  tcpServer.listen(port, '127.0.0.1', () => {
+    logInfo(`TCP Server listening on ${port}`, 'server', 'hardware')
   })
 }
 
-function writeTcpSockets (data) {
+function writeTcpSockets(data) {
   for (let socket of sockets) {
     socket.write(JSON.stringify(data))
   }
 }
 
-export { connectTcpServer, tcpServer, writeTcpSockets}
+export { connectTcpServer, tcpServer, writeTcpSockets }

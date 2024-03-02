@@ -18,15 +18,15 @@ const chkMakeFolder = (folder) => {
 }
 
 function getFolders(email) {
-  const globalFolders = getDirs(globalFolder)
-  const userFolder = path.join(mediaFolder, email)
+  const globalFolders = getDirs(mediaPath.global)
+  const userFolder = path.join(mediaPath.media, email)
   chkMakeFolder(userFolder)
   const userFolders = getDirs(userFolder)
   return {
     folders: [
       {
         label: '공용폴더',
-        path: globalFolder,
+        path: mediaPath.global,
         root: true,
         children: globalFolders
       },
@@ -37,7 +37,7 @@ function getFolders(email) {
         children: userFolders
       }
     ],
-    globalFolder,
+    globalFolder: mediaPath.global,
     userFolder
   }
 }
@@ -50,7 +50,7 @@ function getFiles(folder) {
     const stat = fs.statSync(fullpath)
     filesWithData.push({
       fullpath,
-      path: fullpath.replace(mediaFolder, ''),
+      path: fullpath.replace(mediaPath.media, ''),
       type: stat.isDirectory() ? 'folder' : 'file',
       ...stat,
       ...path.parse(fullpath)
@@ -75,9 +75,9 @@ function getFolderSize(folder) {
 }
 
 function deleteTempFolder() {
-  const files = fs.readdirSync(tempFolder)
+  const files = fs.readdirSync(mediaPath.temp)
   for (let i = 0; i < files.length; i++) {
-    const filePath = path.join(tempFolder, files[i])
+    const filePath = path.join(mediaPath.temp, files[i])
     const stats = fs.statSync(filePath)
     if (stats.isDirectory()) {
       fs.rmdirSync(filePath, { recursive: true })
