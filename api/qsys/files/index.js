@@ -23,7 +23,7 @@ const initQsysIo = (io) => {
   io_qsys.on('connection', async (socket) => {
     const { deviceid, type } = socket.request.headers
     // console.log(socket.request.headers)
-    const r = await Bridge.findOne({ id: deviceid })
+    // const r = await Bridge.findOne({ id: deviceid })
     if (!r) {
       socket.disconnect(true)
       logger.error(`Socket.IO Q-SYS disconnected! unregistered device `)

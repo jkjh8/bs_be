@@ -12,14 +12,17 @@ export default async function () {
         case 'tcpServerPort':
           sStatus.tcpServerPort = item.valueNum
           break
+        case 'mediaFolder':
+          sStatus.mediaFolder = item.value
+          break
       }
     })
-    logDebug(`initialization server setup data from db`, 'server', 'setup')
-  } catch (error) {
-    logError(
-      `initialization server setup data error ${error}`,
+    logDebug(
+      `서버의 기본 데이터가 데이터베이스로 부터 업데이트 되었습니다.`,
       'server',
       'setup'
     )
+  } catch (error) {
+    logError(`서버 기본 데이터 갱신 오류: ${error}`, 'server', 'setup')
   }
 }

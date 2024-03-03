@@ -14,11 +14,10 @@ export default function () {
   // serialize user to cookie
   passport.deserializeUser(async (user, done) => {
     try {
-      const r = await userFindOne(
-        { email: user.email },
-        { userPassword: 0, _id: 0 }
+      return done(
+        null,
+        await userFindOne({ email: user.email }, { userPassword: 0, _id: 0 })
       )
-      return done(null, r)
     } catch (err) {
       return done(err, null)
     }

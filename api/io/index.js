@@ -35,19 +35,19 @@ const initIO = (io) => {
 
     // disconnected
     socket.on('disconnect', async (reason) => {
-      if (headers.type && headers.type === 'qsys') {
-        // update qsys bridge status and socket id
-        await Bridge.findOneAndUpdate(
-          { type: 'qsys' },
-          { connected: false, socket: null }
-        )
-        // logged
-        return logWarn(
-          `Socket.io disconnected -- ${socket.id} ${reason}`,
-          'server',
-          'socket.io'
-        )
-      }
+      // if (headers.type && headers.type === 'qsys') {
+      //   // update qsys bridge status and socket id
+      //   await Bridge.findOneAndUpdate(
+      //     { type: 'qsys' },
+      //     { connected: false, socket: null }
+      //   )
+      //   // logged
+      //   return logWarn(
+      //     `Socket.io disconnected -- ${socket.id} ${reason}`,
+      //     'server',
+      //     'socket.io'
+      //   )
+      // }
       // nomal user disconnected
       logWarn(
         `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`,

@@ -5,23 +5,24 @@ import { logInfo, logError, logDebug } from '@/api/logger'
 
 const router = express.Router()
 
-router.get('/port', isAdmin, async (req, res) => {
-  try {
-    let r = await Setup.findOne({ key: 'tcpServerPort' })
-    if (r) {
-      sStatus.tcpServerPort = r.valueNum
-    } else {
-      await Setup.create({
-        key: 'tcpServerPort',
-        valueNum: 9997
-      })
+router.get('/port', isAdmin, (req, res) => {
+  Setup.findOne({ key: 'tcpServerPort' })
+    .then((doc) => {
+      if (doc) {
+        sStatus.tcpServerPort = doc.valueNum
+      } else {
+        Setup.create({
+          key: 'tcpServerPort',
+          valueNum: 9997
+        }).exec()
+      }
       sStatus.tcpServerPort = 9997
-    }
-    res.status(200).json({ ...sStatus })
-  } catch (error) {
-    logError(`get tcp server port error ${error}`, 'server', 'setup')
-    res.status(500).json({ result: false, error })
-  }
+      res.status(200).json({ ...sStatus })
+    })
+    .catch((error) => {
+      logError(`get tcp server port error ${error}`, 'server', 'setup')
+      res.status(500).json({ result: false, error })
+    })
 })
 
 router.put('/port', isAdmin, async (req, res) => {

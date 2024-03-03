@@ -15,11 +15,13 @@ class CustomMongo extends Transport {
   }
 
   log(info, cb) {
-    setImmediate(async () => {
-      await Logs.create({ ...info })
-      this.emit('logged', info)
+    setImmediate(() => {
+      Logs.create({ ...info }).then(() => {
+        cb()
+      })
+      // this.emit('logged', info)
     })
-    cb()
+    // cb()
   }
 }
 
@@ -52,11 +54,13 @@ const config = {
 //   } -- ${info.message}`
 // })
 
-const logFormat = winston.format.printf(({ timestamp, level, message, source, category }) => {
-  return `${
-    config.colors[level] || ''
-  } ${timestamp} ${level} - ${source} ${category} - ${message}\x1b[0m`
-})
+const logFormat = winston.format.printf(
+  ({ timestamp, level, message, source, category }) => {
+    return `${
+      config.colors[level] || ''
+    } ${timestamp} ${level} - ${source} ${category} - ${message}\x1b[0m`
+  }
+)
 
 // logger mongodb
 const logger = winston.createLogger({
@@ -70,7 +74,10 @@ if (process.env.NODE_ENV !== 'production') {
     new winston.transports.Console({
       levels: config.levels,
       level: 'custom',
-      format: winston.format.combine(winston.format.timestamp({ format: timezoned }), logFormat)
+      format: winston.format.combine(
+        winston.format.timestamp({ format: timezoned }),
+        logFormat
+      )
     })
   )
 }

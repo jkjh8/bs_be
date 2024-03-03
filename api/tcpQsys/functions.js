@@ -2,6 +2,7 @@ import QSys from '@/db/models/qsys'
 import { io } from '@/app'
 import { logInfo, logWarn, logError, logDebug } from '@/api/logger'
 import { writeTcpSockets } from '.'
+import { qsysUpdate, qsysFindOne } from '@/db/functions/qsys'
 
 export default async function tcpcommands(commands) {
   try {
@@ -12,7 +13,7 @@ export default async function tcpcommands(commands) {
         break
       // connect and disconnect
       case 'qsys:connect':
-        await QSys.findOneAndUpdate({ deviceId }, { connected: true })
+        await qsysUpdate({ deviceId }, { connected: true })
         logInfo(
           `QSYS 장치 연결 ${args.name}:${args.ipaddress}-${args.deviceId}`,
           'q-sys',
@@ -22,9 +23,9 @@ export default async function tcpcommands(commands) {
         io.emit('qsys:data', JSON.stringify({ deviceId, connected: true }))
         break
       case 'qsys:disconnect':
-        r = QSys.findOne({ deviceId })
+        r = qsysFindOne({ deviceId })
         if (r && r.connected) {
-          await QSys.findOneAndUpdate({ deviceId }, { connected: false })
+          await qsysUpdate({ deviceId }, { connected: false })
           logWarn(
             `QSYS 장치 연결해제 ${args.name}:${args.ipaddress}-${args.deviceId}`,
             'q-sys',
@@ -35,11 +36,11 @@ export default async function tcpcommands(commands) {
         break
       // qsys status
       case 'qsys:EngineStatus':
-        await QSys.findOneAndUpdate({ deviceId }, { EngineStatus: value })
+        await qsysUpdate({ deviceId }, { EngineStatus: value })
         logDebug(`QSYS 업데이트 ${deviceId} EngineStatus`, 'q-sys', 'data')
         break
       case 'qsys:ZoneStatus':
-        await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: value })
+        await qsysUpdate({ deviceId }, { ZoneStatus: value })
         logDebug(`QSYS 업데이트 ${deviceId} ZoneStatus`, `q-sys`, `data`)
         // broadcast qsys zone and status data
         io.emit(
@@ -48,7 +49,7 @@ export default async function tcpcommands(commands) {
         )
         break
       case 'qsys:GainAndMute':
-        await QSys.findOneAndUpdate({ deviceId }, { ZoneStatus: value })
+        await qsysUpdate({ deviceId }, { ZoneStatus: value })
         logDebug(`QSYS 업데이트 ${deviceId} Gain&Mute`, `q-sys`, `data`)
         // broadcast qsys zone and status data
         io.emit(
@@ -57,14 +58,11 @@ export default async function tcpcommands(commands) {
         )
         break
       case 'qsys:PaConfig':
-        await QSys.findOneAndUpdate({ deviceId }, { PaConfig: value })
+        await qsysUpdate({ deviceId }, { PaConfig: value })
         logDebug(`QSYS 업데이트 ${deviceId} PA Config`, `q-sys`, `data`)
         break
       case 'qsys:ZoneStatusConfigure':
-        await QSys.findOneAndUpdate(
-          { deviceId },
-          { ZoneStatusConfigure: value }
-        )
+        await qsysUpdate({ deviceId }, { ZoneStatusConfigure: value })
         logDebug(
           `QSYS 업데이트 ${deviceId} ZoneStatus Configure updated`,
           'q-sys',
@@ -73,7 +71,7 @@ export default async function tcpcommands(commands) {
         break
       // pa
       case 'qsys:page:message':
-        await QSys.findOneAndUpdate({ deviceId }, { PageID: args.PageID })
+        await qsysUpdate({ deviceId }, { PageID: args.PageID })
         logDebug(
           `QSYS ${deviceId} 메시지 방송시작 pageId ${args.PageID}`,
           'q-sys',
@@ -81,7 +79,7 @@ export default async function tcpcommands(commands) {
         )
         break
       case 'qsys:page:live':
-        await QSys.findOneAndUpdate({ deviceId }, { PageID: args.PageID })
+        await qsysUpdate({ deviceId }, { PageID: args.PageID })
         logDebug(
           `QSYS ${deviceId} 라이브 방송시작 pageId ${args.PageID}`,
           'q-sys',

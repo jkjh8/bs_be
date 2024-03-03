@@ -15,8 +15,7 @@ import sessionOptions from './system/session.js'
 import passport from 'passport'
 import passportConfig from './api/user/passport.js'
 // db
-import connectMongoose from './db'
-import Setup from './db/models/setup.js'
+import './db'
 // loggers
 import loggerWeb from 'morgan'
 import { logInfo, logError } from './api/logger/index.js'
@@ -33,7 +32,6 @@ import initFolders from './system/setFolder.js'
 import initSetup from './system/initSetup.js'
 
 // mongoose connected
-connectMongoose()
 
 const app = express()
 const server = http.createServer(app)
@@ -65,9 +63,11 @@ io.engine.use(sessionMiddleware)
 initIO(io)
 
 // static
-initFolders(app)
+// 미디어폴더 공유
+initFolders(__dirname, app)
+// 호스팅
 app.use(express.static(path.resolve(__dirname, 'public', 'spa')))
-app.use('/media', express.static(mediaPath.media))
+
 /************************ routes ************************/
 app.use('/', indexRouter)
 
@@ -102,7 +102,9 @@ try {
 global.sStatus = {
   ttsAddress: 'http://127.0.0.1:9998',
   tcpServerPort: 9997,
-  tcpServerStatus: false
+  tcpServerStatus: false,
+  defaultFoler: __dirname,
+  mediaFolder: ''
 }
 
 // get setup data from db

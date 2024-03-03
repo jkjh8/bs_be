@@ -11,8 +11,11 @@ const makeSearchField = (schema, searchField, getter) => {
     this[searchField] = getter(this)
   })
   schema.post('updateOne', async function () {
-    const docUpated = await this.model.findOne(this.getFilter())
-    if (docUpated) await docUpated.save()
+    this.model.findOne(this.getFilter()).then((doc) => {
+      if (doc) {
+        return docUpated.save()
+      }
+    })
   })
 }
 
