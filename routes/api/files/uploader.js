@@ -1,4 +1,5 @@
 import multer from 'multer'
+import { logInfo, logError, logDebug } from '@/api/logger'
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -7,7 +8,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     logInfo(
-      `file uploaded successfully name: ${file.fieldname.toString('utf8')}`,
+      `파일 업로드: ${file.fieldname.toString('utf8')}`,
       'server',
       'files'
     )

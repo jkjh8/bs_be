@@ -9,6 +9,7 @@ import {
   getFolders,
   getFiles,
   getFolderSize,
+  remveFileFolder,
   deleteTempFolder
 } from '@/api/files'
 import { logInfo, logError, logDebug } from '@/api/logger'
@@ -21,7 +22,7 @@ router.get('/', (req, res) => {
     const { folder } = req.query
     res.status(200).json({ files: getFiles(folder) })
   } catch (error) {
-    logError(`get media files error: ${error}`, 'server', 'files')
+    logError(`파일 검색 오류: ${error}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
 })
@@ -32,7 +33,7 @@ router.post('/', upload.any(), (req, res) => {
       result: 'OK'
     })
   } catch (error) {
-    logError(`file upload error: ${error}`, 'server', 'files')
+    logError(`파일 업로드 오류: ${error}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
 })
@@ -43,36 +44,16 @@ router.get('/dir', (req, res) => {
     const { email } = req.user
     res.status(200).json(getFolders(email))
   } catch (error) {
-    logError(`file get dir error: ${error}`, 'server', 'files')
+    logError(`폴더 검색 오류 : ${error}`, 'server', 'files')
   }
 })
 
 router.post('/newfolder', (req, res) => {
   try {
-    const { folder, name } = req.body
-    chkMakeFolder(path.resolve(folder, name))
-    logInfo(`make new folder ${name} by ${req.user.email}`, 'server', 'files')
-    res.status(200).json({ result: 'OK' })
-  } catch (error) {
-    logError(`make new folder error: ${error}`, 'server', 'files')
-    res.status(500).json({ result: false, error })
-  }
-})
-
-router.delete('/', (req, res) => {
-  try {
-    const { files } = req.body
-    for (let file of files) {
-      if (fs.existsSync(file.fullpath)) {
-        if (file.type === 'folder') {
-          fs.rmdirSync(file.fullpath, { recursive: true })
-        } else {
-          fs.unlinkSync(file.fullpath)
-        }
-      }
-    }
+    const newFolder = path.join(req.body.folder, req.body.name)
+    chkMakeFolder(newFolder)
     logInfo(
-      `removed file or folder path: ${files.map((item) => item.base)} by ${
+      `새폴더: ${newFolder.replace(mediaPath.media, '')}, 사용자:${
         req.user.email
       }`,
       'server',
@@ -80,7 +61,25 @@ router.delete('/', (req, res) => {
     )
     res.status(200).json({ result: 'OK' })
   } catch (error) {
-    logError(`remove folder or file error ${error}`, 'server', 'files')
+    logError(`새폴더 오류: ${error}`, 'server', 'files')
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.delete('/', (req, res) => {
+  try {
+    const { files } = req.body
+    remveFileFolder(files)
+    logInfo(
+      `파일(폴더) 삭제: ${files.map((item) => item.base)}, 사용자: ${
+        req.user.email
+      }`,
+      'server',
+      'files'
+    )
+    res.status(200).json({ result: 'OK' })
+  } catch (error) {
+    logError(`파일(폴더) 삭제 오류: ${error}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
 })
@@ -88,10 +87,10 @@ router.delete('/', (req, res) => {
 router.delete('/temp', isAdmin, (req, res) => {
   try {
     deleteTempFolder()
-    logInfo(`removed temp folder by ${req.user.email}`, 'server', 'files')
+    logInfo(`임시 폴더 비우기, 사용자: ${req.user.email}`, 'server', 'files')
     res.status(200).json({ result: 'OK' })
   } catch (error) {
-    logError(`remove temp foler error ${error}`, 'server', 'files')
+    logError(`임시 폴더 비우기 오류: ${error}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
 })
@@ -100,7 +99,7 @@ router.get('/download', async (req, res) => {
   try {
     res.download(await ziper(JSON.parse(req.query.files)))
   } catch (error) {
-    logError(`file download error: ${error}`)
+    logError(`파일 다운로드 오류: ${error}`)
     res.status(500).json({ result: false, error })
   }
 })
@@ -110,13 +109,13 @@ router.put('/rename', (req, res) => {
     const { oldName, newName } = req.body
     fs.renameSync(oldName, newName)
     logInfo(
-      `file or folder renamed ${oldName} to ${newName} by ${req.user.email}`,
+      `파일(폴더) 이름 변경: ${oldName} to ${newName}, 사용자: ${req.user.email}`,
       'server',
       'files'
     )
     res.status(200).json({ result: 'OK' })
   } catch (error) {
-    logError(`rename file or folder failed by ${req.user.email} ${error}`)
+    logError(`파일(폴더) 이름 변경 실패, 사용자: ${req.user.email} ${error}`)
     res.status(500).json({ result: false, error })
   }
 })
@@ -124,21 +123,15 @@ router.put('/rename', (req, res) => {
 router.get('/size', (req, res) => {
   try {
     const { fullpath } = req.query
+    let size = 0
     if (fullpath === 'temp') {
-      return res
-        .status(200)
-        .json({ result: true, size: getFolderSize(mediaPath.temp) })
+      size = getFolderSize(mediaPath.temp)
+    } else {
+      size = getFolderSize(fullpath)
     }
-    if (fs.existsSync(fullpath)) {
-      return res
-        .status(200)
-        .json({ result: true, size: getFolderSize(fullpath) })
-    }
-    res
-      .status(200)
-      .json({ result: false, size: 0, message: 'file or folder not exists' })
+    res.status(200).json({ size })
   } catch (error) {
-    logError(`file or Folder check size error ${fullpath}`, 'server', 'files')
+    logError(`파일(폴더) 크기 확인 오류: ${fullpath}`, 'server', 'files')
     res.status(500).json({ result: false, error })
   }
 })

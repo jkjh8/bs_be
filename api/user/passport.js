@@ -3,8 +3,8 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import bcrypt from 'bcrypt'
-// db models
-import User from '@/db/models/user.js'
+// db funtions
+import { userFindOne } from '../../db/functions/user'
 
 export default function () {
   // serialize user to cookie
@@ -14,10 +14,10 @@ export default function () {
   // serialize user to cookie
   passport.deserializeUser(async (user, done) => {
     try {
-      const r = await User.findOne(
+      const r = await userFindOne(
         { email: user.email },
         { userPassword: 0, _id: 0 }
-      ).exec()
+      )
       return done(null, r)
     } catch (err) {
       return done(err, null)
@@ -30,14 +30,14 @@ export default function () {
       { usernameField: 'email', passwordField: 'userPassword' },
       async (email, password, done) => {
         try {
-          const user = await User.findOne({ email: email }).exec()
+          const user = await userFindOne({ email: email })
           // not find user email
           if (!user)
             return done(null, false, {
               message: '사용자를 찾을 수 없습니다. 이메일을 확인해 주세요'
             })
           // compare password and hash
-          if (await bcrypt.compare(password, user.userPassword)) {
+          if (bcrypt.compare(password, user.userPassword)) {
             // seccess login db update
             user.numberOfLogins++
             user.loginAt = Date.now()

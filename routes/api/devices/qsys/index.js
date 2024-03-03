@@ -1,49 +1,55 @@
 import express from 'express'
-import QSys from '@/db/models/qsys'
 import { qsysDeviceSend } from '@/api/qsys'
 import { logError, logEvent, logDebug } from '@/api/logger'
 import { io } from '@/app'
+// db functions
+import {
+  qsysMake,
+  qsysFind,
+  qsysUpdate,
+  qsysRemovebyId
+} from '@/db/functions/qsys'
 
 const router = express.Router()
 
 router.get('/', async (req, res) => {
   try {
-    res.status(200).json({ result: true, devices: await QSys.find({}) })
+    res.status(200).json({ result: true, devices: await qsysFind() })
   } catch (error) {
-    logError(`qsys get devices error: ${error}`)
+    logError(`QSYS 장치 검색 오류: ${error}`)
     res.status(500).json({ result: false, error })
   }
 })
 
 router.post('/', async (req, res) => {
   try {
-    await QSys.create({ ...req.body })
+    await qsysMake({ ...req.body })
     // add event log
     logEvent(
-      `add new qsys device ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
+      `QSYS 장치 추가 ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
       req.user.email,
       'qsys'
     )
     await qsysDeviceSend('devices')
     res.status(200).json({ result: true })
   } catch (error) {
-    logError(`qsys add device error: ${error}`)
+    logError(`QSYS 장치 추가 오류: ${error}`)
     res.status(500).json({ result: false, error })
   }
 })
 
 router.delete('/', async (req, res) => {
   try {
-    const r = await QSys.findByIdAndRemove(req.body._id)
+    const r = await qsysRemovebyId(req.body._id)
     logEvent(
-      `qsys device removed ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
+      `QSYS 장치 제거 ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
       req.user.email,
       'qsys'
     )
     await qsysDeviceSend('devices')
     res.status(200).json({ result: true, data: r })
   } catch (error) {
-    logger.error(`qsys remove device error: ${error}`)
+    logger.error(`QSYS 장치 제거 오류: ${error}`)
     res.status(500).json({ result: false, error })
   }
 })
@@ -51,19 +57,22 @@ router.delete('/', async (req, res) => {
 router.put('/volume', async (req, res) => {
   try {
     const { deviceId, zone, value } = req.body
-    await QSys.findOneAndUpdate(
+    await qsysUpdate(
       { deviceId, 'ZoneStatus.Zone': zone },
       { 'ZoneStatus.$.gain': value }
     )
-    io.emit('qsys:command', JSON.stringify({ deviceId, command: 'changeVol', zone, value }))
+    io.emit(
+      'qsys:command',
+      JSON.stringify({ deviceId, command: 'changeVol', zone, value })
+    )
     logDebug(
-      `qsys deviceId ${deviceId} change volume ${zone}: ${value} by ${req.user.email}`,
+      `QSYS 장치ID ${deviceId} 볼륨 변경 ${zone}: ${value}, 사용자: ${req.user.email}`,
       'q-sys',
       'event'
     )
-    res.status(200).json({ result: 'OK', devices: await QSys.find() })
+    res.status(200).json({ result: 'OK', devices: await qsysFind() })
   } catch (error) {
-    logError(`qsys volume change error: ${error}`, 'q-sys', 'event')
+    logError(`QSYS 볼륨 변경 오류: ${error}`, 'q-sys', 'event')
     res.status(500).json({ result: false, error })
   }
 })
@@ -71,19 +80,22 @@ router.put('/volume', async (req, res) => {
 router.put('/mute', async (req, res) => {
   try {
     const { deviceId, zone, value } = req.body
-    await QSys.findOneAndUpdate(
+    await qsysUpdate(
       { deviceId, 'ZoneStatus.Zone': zone },
       { 'ZoneStatus.$.mute': value }
     )
-    io.emit('qsys:command', JSON.stringify({ deviceId, command: 'changeMute', zone, value }))
+    io.emit(
+      'qsys:command',
+      JSON.stringify({ deviceId, command: 'changeMute', zone, value })
+    )
     logDebug(
-      `qsys deviceId ${deviceId} change mute ${zone}: ${value} by ${req.user.email}`,
+      `QSYS 장치ID ${deviceId} 뮤트 ${zone}: ${value}, 사용자: ${req.user.email}`,
       'q-sys',
       'event'
     )
-    res.status(200).json({ result: 'OK', devices: await QSys.find() })
+    res.status(200).json({ result: 'OK', devices: await qsysFind() })
   } catch (error) {
-    logError(`qsys mute change error: ${error}`, 'q-sys', 'event')
+    logError(`QSYS 뮤드 오류: ${error}`, 'q-sys', 'event')
     res.status(500).json({ result: false, error })
   }
 })
@@ -91,18 +103,18 @@ router.put('/mute', async (req, res) => {
 router.put('/modifiedzonename', async (req, res) => {
   try {
     const { deviceId, zone, name } = req.body
-    await QSys.findOneAndUpdate(
+    await qsysUpdate(
       { deviceId, 'ZoneStatus.Zone': zone },
       { 'ZoneStatus.$.name': name }
     )
     logDebug(
-      `qsys deviceId: ${deviceId} zone name change ${zone}: ${name} by ${req.user.email}`,
+      `QSYS 장치ID: ${deviceId} 방송구간 이름변경 ${zone}: ${name}, 사용자: ${req.user.email}`,
       'q-sys',
       'data'
     )
-    res.status(200).json({ result: true, devices: await QSys.find() })
+    res.status(200).json({ result: true, devices: await qsysFind() })
   } catch (error) {
-    logError(`qsys zone name change error: ${error}`)
+    logError(`QSYS 방송구간 이름변경 오류: ${error}`)
   }
 })
 

@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
+// 디렉토리 하위구조
 const getDirs = (dir) =>
   fs.readdirSync(dir).reduce((files, file) => {
     const name = path.join(dir, file)
@@ -17,6 +18,7 @@ const chkMakeFolder = (folder) => {
   }
 }
 
+// 폴더
 function getFolders(email) {
   const globalFolders = getDirs(mediaPath.global)
   const userFolder = path.join(mediaPath.media, email)
@@ -42,6 +44,7 @@ function getFolders(email) {
   }
 }
 
+// 파일
 function getFiles(folder) {
   const files = fs.readdirSync(folder)
   const filesWithData = []
@@ -59,6 +62,7 @@ function getFiles(folder) {
   return filesWithData
 }
 
+// 폴더 사이즈
 function getFolderSize(folder) {
   let size = 0
   const files = fs.readdirSync(folder)
@@ -74,6 +78,7 @@ function getFolderSize(folder) {
   return size
 }
 
+// 임시폴더 비우기
 function deleteTempFolder() {
   const files = fs.readdirSync(mediaPath.temp)
   for (let i = 0; i < files.length; i++) {
@@ -87,11 +92,25 @@ function deleteTempFolder() {
   }
 }
 
+// 파일 & 폴더 지우기
+const remveFileFolder = (list) => {
+  for (let file of list) {
+    if (fs.existsSync(file.fullpath)) {
+      if (file.type === 'folder') {
+        fs.rmdirSync(file.fullpath, { recursive: true })
+      } else {
+        fs.unlinkSync(file.fullpath)
+      }
+    }
+  }
+}
+
 export {
   getDirs,
   chkMakeFolder,
   getFolders,
   getFiles,
   getFolderSize,
-  deleteTempFolder
+  deleteTempFolder,
+  remveFileFolder
 }
