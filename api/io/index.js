@@ -1,15 +1,14 @@
 /** @format */
 
 import { logInfo, logWarn, logError } from '@/api/logger'
-import { deviceListSendtoSocket } from './functions'
+import { sendQsysDevices } from '../qsys'
 
 const initIO = (io) => {
   // session middleware
   io.use(async (socket, next) => {
     const session = socket.request.session
     const token = socket.handshake.auth.token
-    if (token && (await Bridge({ id: token }))) {
-      // console.log('device checked ', token)
+    if (token) {
       return next()
     }
     if (session && session.passport && session.passport.user) {
@@ -20,43 +19,26 @@ const initIO = (io) => {
   })
 
   io.on('connection', async (socket) => {
-    console.log('some device connect')
     const req = socket.request
     const headers = req.headers
 
-    // nomal user connected and logged
-    const email = req.session.passport.user.email
-    logInfo(
-      `Socket.io connected -- ${socket.id} ${email}`,
-      'server',
-      'socket.io'
-    )
-    deviceListSendtoSocket()
+    if (headers.type && headers.type === 'qsys') {
+      sStatus.qsysConnect = true
+      logInfo(`QSYS 브릿지 연결`, 'server', 'socket.io')
+    }
 
     // disconnected
     socket.on('disconnect', async (reason) => {
-      // if (headers.type && headers.type === 'qsys') {
-      //   // update qsys bridge status and socket id
-      //   await Bridge.findOneAndUpdate(
-      //     { type: 'qsys' },
-      //     { connected: false, socket: null }
-      //   )
-      //   // logged
-      //   return logWarn(
-      //     `Socket.io disconnected -- ${socket.id} ${reason}`,
-      //     'server',
-      //     'socket.io'
-      //   )
-      // }
-      // nomal user disconnected
-      logWarn(
-        `Socket.io USER-INTERFACE disconnected -- ${socket.id} ${reason}`,
-        'server',
-        'socket.io'
-      )
+      if (headers.type && headers.type === 'qsys') {
+        sStatus.qsysConnect = false
+        logWarn(`QSYS 브릿지 연결 해제`, 'server', 'socket.io')
+      }
     })
+
+    //
+    sendQsysDevices()
   })
-  logInfo(`Init Socket.io`, 'server', 'socket.io')
+  logInfo(`Socket.IO 활성화`, 'server', 'socket.io')
 }
 
 export { initIO }

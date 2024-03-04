@@ -9,9 +9,6 @@ export default async function () {
         case 'ttsAddress':
           sStatus.ttsAddress = item.value
           break
-        case 'tcpServerPort':
-          sStatus.tcpServerPort = item.valueNum
-          break
         case 'mediaFolder':
           sStatus.mediaFolder = item.value
           break

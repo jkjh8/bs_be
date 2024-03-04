@@ -23,8 +23,6 @@ import { logInfo, logError } from './api/logger/index.js'
 import indexRouter from './routes/index.js'
 // io routes
 import { initIO } from './api/io'
-import { connectTcpServer } from './api/tcpQsys'
-
 // files
 import initFolders from './system/setFolder.js'
 
@@ -101,8 +99,7 @@ try {
 
 global.sStatus = {
   ttsAddress: 'http://127.0.0.1:9998',
-  tcpServerPort: 9997,
-  tcpServerStatus: false,
+  qsysConnect: false,
   defaultFoler: __dirname,
   mediaFolder: ''
 }

@@ -17,6 +17,14 @@ const qsysRemovebyId = async (id) => {
   return await Qsys.findByIdAndDelete(id)
 }
 
+const qsysExists = async (args) => {
+  return await Qsys.exists({ ...args })
+}
+
+const qsysFindAndUpdate = async (args) => {
+  return await Qsys.findOneAndUpdate
+}
+
 const qsysFindOne = (args) => {
   return new Promise((resolve, reject) => {
     Qsys.findOne(args)
@@ -29,4 +37,11 @@ const qsysFindOne = (args) => {
   })
 }
 
-export { qsysMake, qsysFind, qsysUpdate, qsysRemovebyId, qsysFindOne }
+export {
+  qsysMake,
+  qsysFind,
+  qsysUpdate,
+  qsysRemovebyId,
+  qsysExists,
+  qsysFindOne
+}
