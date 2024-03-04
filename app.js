@@ -22,7 +22,7 @@ import { logInfo, logError } from './api/logger/index.js'
 // routes
 import indexRouter from './routes/index.js'
 // io routes
-import { initIO } from './api/io'
+import { initIO } from './io/index.js'
 // files
 import initFolders from './system/setFolder.js'
 

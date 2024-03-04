@@ -21,10 +21,6 @@ const qsysExists = async (args) => {
   return await Qsys.exists({ ...args })
 }
 
-const qsysFindAndUpdate = async (args) => {
-  return await Qsys.findOneAndUpdate
-}
-
 const qsysFindOne = (args) => {
   return new Promise((resolve, reject) => {
     Qsys.findOne(args)

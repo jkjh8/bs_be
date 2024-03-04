@@ -1,7 +1,7 @@
 /** @format */
 
 import { logInfo, logWarn, logError } from '@/api/logger'
-import { sendQsysDevices } from '../qsys'
+import { sendQsysDevices } from '../api/qsys'
 
 const initIO = (io) => {
   // session middleware
