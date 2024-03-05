@@ -61,4 +61,8 @@ export default async function qsysParser(socket) {
   socket.on('qsys:page:cancel', (deviceId) => {
     // page cancel
   })
+
+  socket.on('device:get', () => {
+    sendQsysDevices()
+  })
 }
