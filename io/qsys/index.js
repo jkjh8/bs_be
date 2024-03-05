@@ -1,20 +1,24 @@
-import { sendQsysDevice, sendQsysDevices } from '../../api/qsys'
-import { qsysUpdate } from '../db/functions/qsys'
+import { sendQsysDevice, sendQsysDevices } from '@/api/qsys'
+import { qsysUpdate } from '@/db/functions/qsys'
 
 export default async function qsysParser(socket) {
   socket.on('qsys:connect', async (device) => {
-    await qsysUpdate({ deviceId: device.deviceId }, { connected: true })
+    const { deviceId } = device
+    await qsysUpdate({ deviceId }, { connected: true })
+    // await qsysUpdate({ deviceId: device.deviceId }, { connected: true })
     await sendQsysDevices()
   })
 
   socket.on('qsys:disconnect', async (device) => {
-    await qsysUpdate({ deviceId: device.deviceId }, { connected: false })
+    const { deviceId } = device
+    await qsysUpdate({ deviceId }, { connected: false })
     await sendQsysDevices()
   })
 
   socket.on('qsys:EngineStatus', async (args) => {
-    const { deviceId, EnginStatus } = args
-    await qsysUpdate({ deviceId }, { EnginStatus })
+    console.log(args)
+    const { deviceId, EngineStatus } = args
+    await qsysUpdate({ deviceId }, { EngineStatus })
     await sendQsysDevices()
   })
 

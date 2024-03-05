@@ -1,11 +1,9 @@
 import mongoose from 'mongoose'
-import Inc from 'mongoose-sequence'
 
-const AutoIncrement = Inc(mongoose)
 const qsysSchema = new mongoose.Schema(
   {
     name: String,
-    idx: Number,
+    idx: { type: Number, default: 0 },
     deviceId: { type: String, unique: true },
     ipaddress: { type: String, unique: true },
     connected: { type: Boolean, default: false },
@@ -36,8 +34,3 @@ const qsysSchema = new mongoose.Schema(
 )
 
 export default mongoose.model('QSys', qsysSchema)
-
-qsysSchema.plugin(AutoIncrement, {
-  id: 'qsys_idx',
-  inc_field: 'idx'
-})

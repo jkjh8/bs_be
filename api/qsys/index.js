@@ -4,7 +4,7 @@ import { qsysFind, qsysUpdate, qsysFindOne } from '@/db/functions/qsys'
 // import qsys from '../../db/models/qsys'
 
 async function sendQsysDevices() {
-  io.emit('qsys:devices', JSON.stringify(await qsysFind({})))
+  io.emit('qsys:devices', await qsysFind())
 }
 
 async function sendQsysDevice(deviceId) {

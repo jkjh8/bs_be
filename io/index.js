@@ -2,6 +2,7 @@
 
 import { logInfo, logWarn, logError } from '@/api/logger'
 import { sendQsysDevices } from '../api/qsys'
+import fromQsys from './qsys'
 
 const initIO = (io) => {
   // session middleware
@@ -25,6 +26,7 @@ const initIO = (io) => {
     if (headers.type && headers.type === 'qsys') {
       sStatus.qsysConnect = true
       logInfo(`QSYS 브릿지 연결`, 'server', 'socket.io')
+      fromQsys(socket)
     }
 
     // disconnected

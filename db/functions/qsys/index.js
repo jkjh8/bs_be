@@ -9,8 +9,8 @@ const qsysMake = async (args) => {
   return await doc.save()
 }
 
-const qsysUpdate = async (args) => {
-  return await Qsys.findOneAndUpdate(args)
+const qsysUpdate = async (filter, value) => {
+  return await Qsys.updateOne(filter, value)
 }
 
 const qsysRemovebyId = async (id) => {
