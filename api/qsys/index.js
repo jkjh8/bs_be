@@ -11,4 +11,16 @@ async function sendQsysDevice(deviceId) {
   io.emit('qsys:device', JSON.stringify(await QSys.find({ deviceId })))
 }
 
-export { sendQsysDevice, sendQsysDevices }
+const broadcastQsysZoneStatus = (socket, deviceId, ZoneStatus) => {
+  socket.broadcast.emit('qsys:ZoneStatus', { deviceId, ZoneStatus })
+}
+
+const socketSendQsysDevices = async (socket) => {
+  socket.emit('qsys:deivces', await qsysFind())
+}
+export {
+  sendQsysDevice,
+  sendQsysDevices,
+  broadcastQsysZoneStatus,
+  socketSendQsysDevices
+}

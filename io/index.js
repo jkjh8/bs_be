@@ -1,7 +1,7 @@
 /** @format */
 
 import { logInfo, logWarn, logError } from '@/api/logger'
-import { sendQsysDevices } from '../api/qsys'
+import { sendQsysDevices, socketSendQsysDevices } from '../api/qsys'
 import fromQsys from './qsys'
 
 const initIO = (io) => {
@@ -26,8 +26,9 @@ const initIO = (io) => {
     if (headers.type && headers.type === 'qsys') {
       sStatus.qsysConnect = true
       logInfo(`QSYS 브릿지 연결`, 'server', 'socket.io')
-      fromQsys(socket)
+      sendQsysDevices()
     }
+    fromQsys(socket)
 
     // disconnected
     socket.on('disconnect', async (reason) => {
@@ -38,7 +39,7 @@ const initIO = (io) => {
     })
 
     //
-    sendQsysDevices()
+    socketSendQsysDevices(socket)
   })
   logInfo(`Socket.IO 활성화`, 'server', 'socket.io')
 }

@@ -33,12 +33,12 @@ router.put('/addr', isAdmin, async (req, res) => {
     await Setup.findOneAndUpdate({ key: 'ttsAddress' }, { value: newName })
     // update global tts address
     sStatus.ttsAddress = newName
-    res.status(200).json({ result: true })
     logInfo(
       `update tts server address to ${newName} by ${req.user.email}`,
       'server',
       'setup'
     )
+    res.status(200).json({ result: true })
   } catch (error) {
     logError(`edit tts address error ${error}`, 'server', 'setup')
     res.status(500).json({ result: false, error })

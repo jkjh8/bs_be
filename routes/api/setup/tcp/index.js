@@ -28,18 +28,19 @@ router.get('/port', isAdmin, (req, res) => {
 router.put('/port', isAdmin, async (req, res) => {
   try {
     const { newPort } = req.body
-    await Setup.findOneAndUpdate(
+    await Setup.updateOne(
       { key: 'tcpServerPort' },
-      { valueNum: newPort }
+      { valueNum: newPort },
+      { upsert: true }
     )
     // update global tts address
     sStatus.tcpServerPort = newPort
-    res.status(200).json({ result: true })
     logInfo(
       `change tcp server port to ${newPort} by ${req.user.email}`,
       'server',
       'setup'
     )
+    res.status(200).json({ result: true })
   } catch (error) {
     logError(`edit tts address error ${error}`, 'server', 'setup')
     res.status(500).json({ result: false, error })

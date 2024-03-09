@@ -25,12 +25,12 @@ router.put('/folder', isAdmin, async (req, res) => {
     await Setup.findOneAndUpdate({ key: 'mediaFolder' }, { value: folder })
     // update global tts address
     sStatus.mediaFolder = folder
-    res.status(200).json({ result: true })
     logInfo(
       `미디어 폴더 변경: ${newPort}, 사용자: ${req.user.email}`,
       'server',
       'setup'
     )
+    res.status(200).json({ result: true })
   } catch (error) {
     logError(`미디어 폴더 변경 오류: ${error}`, 'server', 'setup')
     res.status(500).json({ result: false, error })

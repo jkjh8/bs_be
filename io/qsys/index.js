@@ -1,4 +1,8 @@
-import { sendQsysDevice, sendQsysDevices } from '@/api/qsys'
+import {
+  sendQsysDevice,
+  sendQsysDevices,
+  broadcastQsysZoneStatus
+} from '@/api/qsys'
 import { qsysUpdate } from '@/db/functions/qsys'
 
 export default async function qsysParser(socket) {
@@ -25,13 +29,13 @@ export default async function qsysParser(socket) {
   socket.on('qsys:ZoneStatus', async (args) => {
     const { deviceId, ZoneStatus } = args
     await qsysUpdate({ deviceId }, { ZoneStatus })
-    await sendQsysDevices()
+    broadcastQsysZoneStatus(socket, deviceId, ZoneStatus)
   })
 
   socket.on('qsys:GainMute', async (args) => {
     const { deviceId, ZoneStatus } = args
     await qsysUpdate({ deviceId }, { ZoneStatus })
-    await sendQsysDevices()
+    broadcastQsysZoneStatus(socket, deviceId, ZoneStatus)
   })
 
   socket.on('qsys:PaConfig', async (args) => {
@@ -60,6 +64,14 @@ export default async function qsysParser(socket) {
   })
   socket.on('qsys:page:cancel', (deviceId) => {
     // page cancel
+  })
+
+  socket.on('qsys:volume', (args) => {
+    socket.broadcast.emit('qsys:volume', args)
+  })
+
+  socket.on('qsys:mute', (args) => {
+    socket.broadcast.emit('qsys:mute', args)
   })
 
   socket.on('device:get', () => {
