@@ -11,7 +11,7 @@ export default {
     httpOnly: true
   },
   store: MongoStore.create({
-    mongoUrl: 'mongodb://localhost:27017/bs',
+    mongoUrl: 'mongodb://mongodb:27017/bs', // 주소변경
     mongoOptions: { useUnifiedTopology: true }
   })
 }
