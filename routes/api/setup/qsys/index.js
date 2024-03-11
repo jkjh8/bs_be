@@ -5,7 +5,7 @@ import { logInfo, logError } from '@/api/logger'
 
 const router = express.Router()
 
-router.get('/gainstep', isAdmin, (req, res) => {
+router.get('/gainstep', (req, res) => {
   Setup.findOne({ key: 'gainStep' })
     .then((doc) => {
       if (doc && doc.valueNum) {

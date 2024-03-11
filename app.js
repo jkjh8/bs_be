@@ -1,5 +1,5 @@
 /** @format */
-
+import dotenv from 'dotenv'
 import path from 'path'
 import https from 'https'
 // http
@@ -14,6 +14,8 @@ import session from 'express-session'
 import sessionOptions from './system/session.js'
 import passport from 'passport'
 import passportConfig from './api/user/passport.js'
+
+dotenv.config()
 // db
 import './db'
 // loggers
@@ -28,6 +30,7 @@ import initFolders from './system/setFolder.js'
 
 // setup
 import initSetup from './system/initSetup.js'
+
 
 // mongoose connected
 
