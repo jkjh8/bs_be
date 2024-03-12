@@ -1,6 +1,13 @@
 import express from 'express'
 import Barix from '@/db/models/barix'
-// import { qsysDeviceSend } from '@/api/qsys'
+import {
+  barixFind,
+  barixMake,
+  barixExists,
+  barixUpdate,
+  barixRemoveById
+} from '@/db/functions/barix'
+
 import { logError, logEvent, logDebug } from '@/api/logger'
 import { io } from '@/app'
 
@@ -8,7 +15,7 @@ const router = express.Router()
 
 router.get('/', async (req, res) => {
   try {
-    res.status(200).json({ result: true, devices: await Barix.find({}) })
+    res.status(200).json({ result: true, devices: await barixFind() })
   } catch (error) {
     logError(`barix get devices error - ${error}`, 'Barix', 'device')
     res.status(500).json({ result: false, error })
@@ -17,7 +24,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    await Barix.create({ ...req.body })
+    await barixMake({ ...req.body })
     // add event log
     logEvent(
       `add new Barix device ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
@@ -34,7 +41,7 @@ router.post('/', async (req, res) => {
 
 router.delete('/', async (req, res) => {
   try {
-    const r = await Barix.findByIdAndRemove(req.body._id)
+    const r = await barixRemoveById(req.body._id)
     logEvent(
       `Barix device removed ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
       req.user.email,
@@ -45,6 +52,14 @@ router.delete('/', async (req, res) => {
   } catch (error) {
     logger.error(`qsys remove device error: ${error}`, 'Barix', 'device')
     res.status(500).json({ result: false, error })
+  }
+})
+
+router.get('/exists', async (req, res) => {
+  try {
+    res.status(200).json({ result: await barixExists({ ...req.query.value }) })
+  } catch (error) {
+    req.status(500).json({ result: false, error })
   }
 })
 

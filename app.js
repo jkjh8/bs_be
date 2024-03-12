@@ -2,6 +2,7 @@
 import dotenv from 'dotenv'
 import path from 'path'
 import https from 'https'
+import { getBarixInfo } from './api/barix/index.js'
 // http
 import http from 'http'
 import { Server } from 'socket.io'
@@ -17,7 +18,7 @@ import passportConfig from './api/user/passport.js'
 
 dotenv.config()
 // db
-import './db'
+import './db/index.js'
 // loggers
 import loggerWeb from 'morgan'
 import { logInfo, logError } from './api/logger/index.js'
@@ -30,7 +31,6 @@ import initFolders from './system/setFolder.js'
 
 // setup
 import initSetup from './system/initSetup.js'
-
 
 // mongoose connected
 
@@ -92,10 +92,10 @@ app.use('/', indexRouter)
 // app start server
 try {
   server.listen(3000, () => {
-    logInfo('Web Server Listenning to port 3000', 'server', 'boot')
+    logInfo('3000번 포트에서 웹서버가 시작 되었습니다', 'server', 'boot')
   })
 } catch (err) {
-  logError('Web Server not opend', 'server', 'boot')
+  logError('웹서버 오류', 'server', 'boot')
 }
 
 // global variables
@@ -104,10 +104,12 @@ global.sStatus = {
   ttsAddress: 'http://127.0.0.1:9998',
   qsysConnect: false,
   defaultFoler: __dirname,
-  mediaFolder: ''
+  mediaFolder: '',
+  interval: 5
 }
 
-// get setup data from db
+// get setup data from db and start interval
 initSetup()
+
 export default app
 export { io }
