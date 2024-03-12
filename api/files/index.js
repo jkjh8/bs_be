@@ -12,7 +12,7 @@ const getDirs = (dir) =>
     return files
   }, [])
 
-const chkMakeFolder = (folder) => {
+const fnCheckMakeFolder = (folder) => {
   if (!fs.existsSync(folder)) {
     fs.mkdirSync(folder, { recursive: true })
   }
@@ -107,7 +107,7 @@ const remveFileFolder = (list) => {
 
 export {
   getDirs,
-  chkMakeFolder,
+  fnCheckMakeFolder,
   getFolders,
   getFiles,
   getFolderSize,

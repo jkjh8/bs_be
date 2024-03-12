@@ -2,13 +2,13 @@ import fs from 'fs'
 import path from 'path'
 import archiver from 'archiver'
 import hash from '@/api/uniqueId'
-import { chkFolder } from '@/api/files'
+import { fnCheckMakeFolder } from '@/api/files'
 
 const tempFolder = path.join(__dirname, '../../../media', 'temp')
 
 export default async function (files) {
   // check and made temp folder
-  chkFolder(tempFolder)
+  fnCheckMakeFolder(tempFolder)
   return new Promise((resolve, reject) => {
     const filename = `${hash(8)}.zip`
     const output = fs.createWriteStream(tempFolder + '/' + filename)

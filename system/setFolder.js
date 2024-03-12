@@ -1,6 +1,6 @@
 import path from 'node:path'
 import express from 'express'
-import { chkMakeFolder } from '../api/files'
+import { fnCheckMakeFolder } from '../api/files'
 import setup from '../db/models/setup'
 import { logError } from '../api/logger'
 
@@ -17,9 +17,9 @@ export default async function (defaultFolder, app) {
       const mediaF = path.join(defaultF, 'media')
       const globalF = path.join(mediaF, 'global')
       const tempF = path.join(mediaF, 'temp')
-      chkMakeFolder(mediaF)
-      chkMakeFolder(globalF)
-      chkMakeFolder(tempF)
+      fnCheckMakeFolder(mediaF)
+      fnCheckMakeFolder(globalF)
+      fnCheckMakeFolder(tempF)
 
       global.mediaPath = {
         default: defaultF,
