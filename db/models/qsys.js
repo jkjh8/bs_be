@@ -20,7 +20,7 @@ const qsysSchema = new mongoose.Schema(
         gain: Number,
         mute: Number,
         name: String,
-        destination: mongoose.Types.ObjectId
+        destination: { type: mongoose.Types.ObjectId, ref: 'Barix' }
       }
     ],
     PageStatus: Object,

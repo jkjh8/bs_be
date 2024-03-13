@@ -1,14 +1,16 @@
 import express from 'express'
 import { sendQsysDevices } from '@/api/qsys/devices'
 import { logError, logEvent, logDebug } from '@/api/logger'
-import { io } from '@/app'
+import Qsys from '@/db/models/qsys'
 // db functions
 import {
   qsysMake,
   qsysFind,
   qsysUpdate,
+  qsysFindByIdUpdate,
   qsysRemovebyId,
-  qsysExists
+  qsysExists,
+  qsysFindAll
 } from '@/db/functions/qsys'
 import { qsysCommand } from '@/api/qsys/command'
 
@@ -16,7 +18,7 @@ const router = express.Router()
 
 router.get('/', async (req, res) => {
   try {
-    res.status(200).json({ result: true, devices: await qsysFind() })
+    res.status(200).json({ result: true, devices: await qsysFindAll() })
   } catch (error) {
     logError(`QSYS 장치 검색 오류: ${error}`)
     res.status(500).json({ result: false, error })
@@ -99,8 +101,40 @@ router.put('/mute', async (req, res) => {
       'event'
     )
   } catch (error) {
-    logError(`QSYS 뮤드 오류: ${error}`, 'q-sys', 'event')
+    logError(`QSYS 뮤드 오류: ${error}`, 'qsys', 'event')
     res.status(500).json({ result: false, error })
+  }
+})
+
+router.put('/zoneupdate', async (req, res) => {
+  try {
+    const { id, zone, destination } = req.body
+    console.log(id, zone, destination)
+    res.status(200).json({
+      result: true,
+      value: await qsysUpdate(
+        { '_id': id, 'ZoneStatus.Zone': zone },
+        { 'ZoneStatus.$.destination': destination }
+      )
+    })
+  } catch (error) {
+    logError(`QSYS 데이터 업데이트 ${error}`, 'qsys', 'event')
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.get('/existszone', async (req, res) => {
+  try {
+    const { id } = req.query
+    res.status(200).json({
+      result: true,
+      value: await qsysFind({
+        ZoneStatus: { $elemMatch: { destination: id } }
+      })
+    })
+  } catch (error) {
+    logError(`QSYS 방송 지역 검색 ${error}`)
+    res.status(500).json({ status: false, error })
   }
 })
 

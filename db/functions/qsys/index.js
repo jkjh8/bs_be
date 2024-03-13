@@ -1,5 +1,9 @@
 import Qsys from '../../models/qsys'
 
+const qsysFindAll = async () => {
+  return await Qsys.find().populate('ZoneStatus.destination')
+}
+
 const qsysFind = async (args) => {
   return await Qsys.find(args)
 }
@@ -11,6 +15,10 @@ const qsysMake = async (args) => {
 
 const qsysUpdate = async (filter, value) => {
   return await Qsys.updateOne(filter, value)
+}
+
+const qsysFindByIdUpdate = async (id, value) => {
+  return await Qsys.findByIdAndUpdate(id, { ...value })
 }
 
 const qsysRemovebyId = async (id) => {
@@ -37,7 +45,9 @@ export {
   qsysMake,
   qsysFind,
   qsysUpdate,
+  qsysFindByIdUpdate,
   qsysRemovebyId,
   qsysExists,
-  qsysFindOne
+  qsysFindOne,
+  qsysFindAll
 }
