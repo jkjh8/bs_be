@@ -6,6 +6,7 @@ const getHtml = async (ipaddress) => {
   axios.get(`http://${ipaddress}/status2`).then((html) => {
     const $ = cheerio.load(html.data)
     parentPort.postMessage({
+      status: true,
       macaddress: $('#macaddress').text().trim(),
       gateway: $('#gateway').text().trim(),
       netmask: $('#netmask').text().trim(),

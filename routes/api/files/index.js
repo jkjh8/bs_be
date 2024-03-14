@@ -5,7 +5,7 @@ import { isAdmin } from '../../../api/user/isLoggedin'
 import upload from './uploader'
 
 import {
-  chkMakeFolder,
+  fnCheckMakeFolder,
   getFolders,
   getFiles,
   getFolderSize,
@@ -51,7 +51,7 @@ router.get('/dir', (req, res) => {
 router.post('/newfolder', (req, res) => {
   try {
     const newFolder = path.join(req.body.folder, req.body.name)
-    chkMakeFolder(newFolder)
+    fnCheckMakeFolder(newFolder)
     logInfo(
       `새폴더: ${newFolder.replace(mediaPath.media, '')}, 사용자:${
         req.user.email

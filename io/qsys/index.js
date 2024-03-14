@@ -1,53 +1,62 @@
 import {
-  sendQsysDevice,
-  sendQsysDevices,
-  broadcastQsysZoneStatus
+  fnSendQsysDevice,
+  fnSendQsysDevices,
+  fnBroadcastQsysZoneStatus,
+  fnSocketSendQsysDevices
 } from '@/api/qsys'
-import { qsysUpdate } from '@/db/functions/qsys'
+import { qsysUpdate, qsysFindOne } from '@/db/functions/qsys'
 
 export default async function qsysParser(socket) {
   socket.on('qsys:connect', async (device) => {
     const { deviceId } = device
     await qsysUpdate({ deviceId }, { connected: true })
     // await qsysUpdate({ deviceId: device.deviceId }, { connected: true })
-    await sendQsysDevices()
+    await fnSendQsysDevices()
   })
 
   socket.on('qsys:disconnect', async (device) => {
     const { deviceId } = device
     await qsysUpdate({ deviceId }, { connected: false })
-    await sendQsysDevices()
+    await fnSendQsysDevices()
   })
 
   socket.on('qsys:EngineStatus', async (args) => {
     console.log(args)
     const { deviceId, EngineStatus } = args
     await qsysUpdate({ deviceId }, { EngineStatus })
-    await sendQsysDevices()
+    await fnSendQsysDevices()
   })
 
   socket.on('qsys:ZoneStatus', async (args) => {
     const { deviceId, ZoneStatus } = args
     await qsysUpdate({ deviceId }, { ZoneStatus })
-    broadcastQsysZoneStatus(socket, deviceId, ZoneStatus)
+    fnBroadcastQsysZoneStatus(socket, deviceId, ZoneStatus)
   })
 
   socket.on('qsys:GainMute', async (args) => {
     const { deviceId, ZoneStatus } = args
     await qsysUpdate({ deviceId }, { ZoneStatus })
-    broadcastQsysZoneStatus(socket, deviceId, ZoneStatus)
+    fnBroadcastQsysZoneStatus(socket, deviceId, ZoneStatus)
   })
 
   socket.on('qsys:PaConfig', async (args) => {
     const { deviceId, PaConfig } = args
     await qsysUpdate({ deviceId }, { PaConfig })
-    await sendQsysDevices()
+    await fnSendQsysDevices()
   })
 
   socket.on('qsys:ZoneStatusConfigure', async (args) => {
-    const { deviceId, ZoneStatusConfigure } = args
-    await qsysUpdate({ deviceId }, { ZoneStatusConfigure })
-    await sendQsysDevices()
+    const { deviceId, ZoneStatusConfigure, channel, ZoneStatus } = args
+    // 채널 길이 지정
+    const zone = await qsysFindOne({ deviceId })
+    const newZone = zone.ZoneStatus
+    newZone.length = channel
+    for (let i = 0; i < newZone.length; i++) {
+      newZone[i] = { ...newZone[i], ...ZoneStatus[i] }
+    }
+    await qsysUpdate({ deviceId }, { ZoneStatus: newZone, ZoneStatusConfigure })
+    // 상태 업데이트
+    await fnSendQsysDevices()
   })
 
   socket.on('qsys:page:message', async (args) => {
@@ -75,6 +84,6 @@ export default async function qsysParser(socket) {
   })
 
   socket.on('device:get', () => {
-    sendQsysDevices()
+    fnSendQsysDevices()
   })
 }

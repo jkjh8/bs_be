@@ -5,6 +5,7 @@ import { barixFind, barixUpdate } from '../../db/functions/barix'
 
 let barixGetInterval = null
 
+// 개별 Barix 갱신 호출
 const getBarixInfo = (ipaddr) => {
   const worker = new Worker(path.join(__dirname, 'worker.js'), {
     workerData: ipaddr
@@ -24,11 +25,20 @@ const getBarixInfo = (ipaddr) => {
   })
 }
 
+// 전체 Barix 갱신 호출
 const getBarixes = async () => {
   const devices = await barixFind()
-  devices.forEach((device) => getBarixInfo(device.ipaddress))
+  devices.forEach((device) => {
+    try {
+      getBarixInfo(device.ipaddress)
+    } catch (error) {
+      if (device.deviceId) {
+        barixUpdate({ deviceId: device.deviceId }, { status: false })
+      }
+    }
+  })
 }
-
+// 인터벌 설정
 const startIntervalGetBarix = () => {
   barixGetInterval = setInterval(() => {
     console.log('update barix')

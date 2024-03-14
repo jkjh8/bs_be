@@ -10,7 +10,7 @@ const qsysSchema = new mongoose.Schema(
     EngineStatus: Object,
     ZoneStatus: [
       {
-        Active: Boolean,
+        Active: { type: Boolean, default: false },
         Message: String,
         Priority: Number,
         PriorityName: String,
@@ -20,7 +20,10 @@ const qsysSchema = new mongoose.Schema(
         gain: Number,
         mute: Number,
         name: String,
-        destination: { type: mongoose.Types.ObjectId, ref: 'Barix' }
+        destination: {
+          type: mongoose.Types.ObjectId,
+          ref: 'Barix'
+        }
       }
     ],
     PageStatus: Object,

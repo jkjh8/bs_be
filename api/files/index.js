@@ -22,7 +22,7 @@ const fnCheckMakeFolder = (folder) => {
 function getFolders(email) {
   const globalFolders = getDirs(mediaPath.global)
   const userFolder = path.join(mediaPath.media, email)
-  chkMakeFolder(userFolder)
+  fnCheckMakeFolder(userFolder)
   const userFolders = getDirs(userFolder)
   return {
     folders: [
