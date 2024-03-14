@@ -13,6 +13,7 @@ import {
   qsysFindAll
 } from '@/db/functions/qsys'
 import { qsysCommand } from '@/api/qsys/command'
+import { fnSendQsysRefreshAll } from '../../../../api/qsys'
 
 const router = express.Router()
 
@@ -153,6 +154,16 @@ router.put('/modifiedzonename', async (req, res) => {
     )
   } catch (error) {
     logError(`QSYS 방송구간 이름변경 오류: ${error}`)
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.get('/refreshall', async (req, res) => {
+  try {
+    fnSendQsysRefreshAll(req.params.deviceId)
+    res.status(200).json({ result: true })
+  } catch (error) {
+    res.status(500).json({ result: false, error })
   }
 })
 
