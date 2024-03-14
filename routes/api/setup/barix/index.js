@@ -2,6 +2,7 @@ import express from 'express'
 import Setup from '@/db/models/setup'
 import { isAdmin } from '@/api/user/isLoggedin'
 import { logInfo, logError } from '@/api/logger'
+import { restartIntervalGetBarix } from '@/api/barix'
 
 const router = express.Router()
 
@@ -27,6 +28,8 @@ router.put('/interval', isAdmin, async (req, res) => {
       { valueNum: newInterval },
       { upsert: true }
     )
+    sStatus.interval = newInterval
+    restartIntervalGetBarix()
     // update global tts address
     logInfo(
       `change http interval to ${newInterval} by ${req.user.email}`,

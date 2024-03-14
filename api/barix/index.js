@@ -36,4 +36,15 @@ const startIntervalGetBarix = () => {
   }, sStatus.interval * 1000)
 }
 
-export { getBarixInfo, getBarixes, barixGetInterval, startIntervalGetBarix }
+const restartIntervalGetBarix = () => {
+  clearInterval(barixGetInterval)
+  startIntervalGetBarix()
+}
+
+export {
+  getBarixInfo,
+  getBarixes,
+  barixGetInterval,
+  startIntervalGetBarix,
+  restartIntervalGetBarix
+}
