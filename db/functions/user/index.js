@@ -20,4 +20,8 @@ function userFindOne(args) {
   })
 }
 
-export { makeUser, userFind, userFindOne }
+const userUpdate = async (filter, value) => {
+  return await User.updateOne(filter, value)
+}
+
+export { makeUser, userFind, userFindOne, userUpdate }
