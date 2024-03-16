@@ -2,45 +2,25 @@ import express from 'express'
 import Hangul from 'hangul-js'
 import Logs from '@/db/models/logs'
 import { isloggedin } from '@/api/user/isLoggedin'
+import { logInfo, logError, logDebug } from '@/api/logger'
 
 const router = express.Router()
 
 router.get('/', isloggedin, async (req, res, next) => {
   try {
-    const { limit, page, search } = req.query
-    const searchOptions = []
-    if (search) {
-      searchOptions.push({
-        search: new RegExp(Hangul.disassembleToString(search), 'i')
-      })
-    }
-    // get count
-    const count = await Logs.countDocuments(
-      searchOptions.length ? { $and: searchOptions } : {}
-    )
-    // get docs
-    const current = await Logs.find(
-      searchOptions.length ? { $and: searchOptions } : {}
-    )
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .sort({ createdAt: -1 })
-      .exec()
-    // return
-    res.status(200).json({ result: true, count, current, limit, page })
-  } catch (error) {
-    logger.error(`시스템 로그 가져오기 실패: ${error}`)
-    res.status(500).json({ result: false, error })
-  }
-})
+    console.log(req.query)
+    let sort = {}
+    const { pagination, filter, level } = JSON.parse(req.query.options)
+    const { rowsPerPage, page, sortBy, descending } = pagination
+    sort[sortBy] = descending ? -1 : 1
 
-router.get('/eventlog', isloggedin, async (req, res, next) => {
-  try {
-    const { limit, page, search } = req.query
-    const searchOptions = [{ levelNum: { $gt: 2 } }]
-    if (search) {
+    const searchOptions = []
+    if (level && level !== 0) {
+      searchOptions.push({ levelNum: { $gt: level } })
+    }
+    if (filter) {
       searchOptions.push({
-        search: new RegExp(Hangul.disassembleToString(search), 'i')
+        search: new RegExp(Hangul.disassembleToString(filter), 'i')
       })
     }
     // get count
@@ -51,14 +31,20 @@ router.get('/eventlog', isloggedin, async (req, res, next) => {
     const current = await Logs.find(
       searchOptions.length ? { $and: searchOptions } : {}
     )
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .sort({ createdAt: -1 })
-      .exec()
+      .limit(rowsPerPage)
+      .skip((page - 1) * rowsPerPage)
+      .sort({ ...sort })
     // return
-    res.status(200).json({ result: true, count, current, limit, page })
+    res.status(200).json({
+      result: true,
+      current,
+      pagination: {
+        ...pagination,
+        rowsNumber: count
+      }
+    })
   } catch (error) {
-    logger.error(`이벤트 로그 가져오기 실패: ${error}`)
+    logError(`로그 데이터 가져오기 실패: ${error}`, 'server', 'log')
     res.status(500).json({ result: false, error })
   }
 })
