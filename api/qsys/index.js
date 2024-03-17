@@ -24,13 +24,19 @@ const fnSocketSendQsysDevices = async (socket) => {
   socket.emit('qsys:deivces', await qsysFind())
 }
 
-const fnSendQsysRefreshAll = (deviceId) => {
+const fnSendQsysRefreshZoneAll = (deviceId) => {
   io.emit('qsys:refreshAll', { deviceId })
 }
+
+const fnSendQsysZone = (deviceId, zone, destination, ipaddress) => {
+  io.emit('qsys:zone', { deviceId, zone, destination, ipaddress })
+}
+
 export {
   fnSendQsysDevice,
   fnSendQsysDevices,
   fnBroadcastQsysZoneStatus,
   fnSocketSendQsysDevices,
-  fnSendQsysRefreshAll
+  fnSendQsysRefreshZoneAll,
+  fnSendQsysZone
 }

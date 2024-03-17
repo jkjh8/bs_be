@@ -13,7 +13,11 @@ import {
   qsysFindAll
 } from '@/db/functions/qsys'
 import { qsysCommand } from '@/api/qsys/command'
-import { fnSendQsysRefreshAll } from '../../../../api/qsys'
+import {
+  fnSendQsysRefreshZoneAll,
+  fnSendQsysDevices,
+  fnSendQsysZone
+} from '@/api/qsys'
 
 const router = express.Router()
 
@@ -30,13 +34,13 @@ router.post('/', async (req, res) => {
   try {
     await qsysMake({ ...req.body })
     await sendQsysDevices()
-    res.status(200).json({ result: true })
-    // add event log
-    logEvent(
+    logDebug(
       `QSYS 장치 추가 ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
       req.user.email,
       'qsys'
     )
+    res.status(200).json({ result: true })
+    // add event log
   } catch (error) {
     logError(`QSYS 장치 추가 오류: ${error}`)
     res.status(500).json({ result: false, error })
@@ -47,12 +51,12 @@ router.delete('/', async (req, res) => {
   try {
     const r = await qsysRemovebyId(req.body._id)
     await sendQsysDevices()
-    res.status(200).json({ result: true, data: r })
-    logEvent(
+    logDebug(
       `QSYS 장치 제거 ${req.body.name}:${req.body.ipaddress}-${req.body.deviceId}`,
       req.user.email,
       'qsys'
     )
+    res.status(200).json({ result: true, data: r })
   } catch (error) {
     logError(`QSYS 장치 제거 오류: ${error}`, 'server', 'qsys')
     res.status(500).json({ result: false, error })
@@ -107,17 +111,20 @@ router.put('/mute', async (req, res) => {
   }
 })
 
+// 방송구간 바릭스 세팅
 router.put('/zoneupdate', async (req, res) => {
   try {
-    const { id, zone, destination } = req.body
-    console.log(id, zone, destination)
-    res.status(200).json({
-      result: true,
-      value: await qsysUpdate(
-        { '_id': id, 'ZoneStatus.Zone': zone },
-        { 'ZoneStatus.$.destination': destination }
-      )
-    })
+    const { id, deviceId, zone, destination, ipaddress } = req.body
+    const r = await qsysUpdate(
+      { '_id': id, 'ZoneStatus.Zone': zone },
+      { 'ZoneStatus.$.destination': destination }
+    )
+
+    // set zone
+    fnSendQsysZone(deviceId, zone, destination, ipaddress)
+    // share data all
+    await fnSendQsysDevices()
+    res.status(200).json({ result: true, value: r })
   } catch (error) {
     logError(`QSYS 데이터 업데이트 ${error}`, 'qsys', 'event')
     res.status(500).json({ result: false, error })
@@ -160,7 +167,7 @@ router.put('/modifiedzonename', async (req, res) => {
 
 router.get('/refreshall', async (req, res) => {
   try {
-    fnSendQsysRefreshAll(req.params.deviceId)
+    fnSendQsysRefreshZoneAll(req.query.deviceId)
     res.status(200).json({ result: true })
   } catch (error) {
     res.status(500).json({ result: false, error })
