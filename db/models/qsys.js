@@ -26,9 +26,15 @@ const qsysSchema = new mongoose.Schema(
         }
       }
     ],
-    PageStatus: Object,
+    PageStatus: [
+      {
+        State: String,
+        Message: String,
+        SubState: String,
+        PageID: Number
+      }
+    ],
     PaConfig: Object,
-    PageID: Number,
     ZoneStatusConfigure: Boolean
   },
   {
