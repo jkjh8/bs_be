@@ -7,6 +7,7 @@ const qsysSchema = new mongoose.Schema(
     deviceId: { type: String, unique: true },
     ipaddress: { type: String, unique: true },
     connected: { type: Boolean, default: false },
+    header: { type: String, default: 'root' },
     EngineStatus: Object,
     ZoneStatus: [
       {

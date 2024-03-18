@@ -16,7 +16,8 @@ import { qsysCommand } from '@/api/qsys/command'
 import {
   fnSendQsysRefreshZoneAll,
   fnSendQsysDevices,
-  fnSendQsysZone
+  fnSendQsysZone,
+  fnCancelAll
 } from '@/api/qsys'
 
 const router = express.Router()
@@ -161,6 +162,16 @@ router.put('/modifiedzonename', async (req, res) => {
     )
   } catch (error) {
     logError(`QSYS 방송구간 이름변경 오류: ${error}`)
+    res.status(500).json({ result: false, error })
+  }
+})
+
+router.get('/cancal', async (req, res) => {
+  try {
+    fnCancelAll(req.query.deviceId)
+    res.status(200).json({ result: true })
+  } catch (error) {
+    logError(`Q-SYS 방송 강제 취소 오류 ${error}`, 'qsys', 'event')
     res.status(500).json({ result: false, error })
   }
 })

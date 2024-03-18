@@ -32,11 +32,16 @@ const fnSendQsysZone = (deviceId, zone, destination, ipaddress) => {
   io.emit('qsys:zone', { deviceId, zone, destination, ipaddress })
 }
 
+const fnCancelAll = (deviceId) => {
+  io.emit('qsys:cancelAll', { deviceId })
+}
+
 export {
   fnSendQsysDevice,
   fnSendQsysDevices,
   fnBroadcastQsysZoneStatus,
   fnSocketSendQsysDevices,
   fnSendQsysRefreshZoneAll,
-  fnSendQsysZone
+  fnSendQsysZone,
+  fnCancelAll
 }
