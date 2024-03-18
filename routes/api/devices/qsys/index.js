@@ -166,9 +166,10 @@ router.put('/modifiedzonename', async (req, res) => {
   }
 })
 
-router.get('/cancal', async (req, res) => {
+router.get('/cancel', async (req, res) => {
   try {
-    fnCancelAll(req.query.deviceId)
+    const { deviceId } = req.query
+    fnCancelAll(deviceId)
     res.status(200).json({ result: true })
   } catch (error) {
     logError(`Q-SYS 방송 강제 취소 오류 ${error}`, 'qsys', 'event')

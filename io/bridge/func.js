@@ -4,14 +4,17 @@ import {
   fnBroadcastQsysZoneStatus,
   fnSocketSendQsysDevices
 } from '@/api/qsys'
-import { qsysUpdate, qsysFindOne } from '@/db/functions/qsys'
+
+import {
+  qsysUpdate,
+  qsysFindOne,
+  qsysFindOneAndUpdate
+} from '@/db/functions/qsys'
 
 export default async function qsysParser(socket) {
   socket.on('qsys:connect', async (device) => {
     const { deviceId } = device
     await qsysUpdate({ deviceId }, { connected: true })
-    // await qsysUpdate({ deviceId: device.deviceId }, { connected: true })
-    await fnSendQsysDevices()
   })
 
   socket.on('qsys:disconnect', async (device) => {
@@ -75,13 +78,13 @@ export default async function qsysParser(socket) {
     // page cancel
   })
 
-  socket.on('qsys:volume', (args) => {
-    socket.broadcast.emit('qsys:volume', args)
-  })
+  // socket.on('qsys:volume', (args) => {
+  //   socket.broadcast.emit('qsys:volume', args)
+  // })
 
-  socket.on('qsys:mute', (args) => {
-    socket.broadcast.emit('qsys:mute', args)
-  })
+  // socket.on('qsys:mute', (args) => {
+  //   socket.broadcast.emit('qsys:mute', args)
+  // })
 
   socket.on('device:get', () => {
     fnSendQsysDevices()

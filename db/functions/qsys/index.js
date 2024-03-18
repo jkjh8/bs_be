@@ -17,6 +17,10 @@ const qsysUpdate = async (filter, value) => {
   return await Qsys.updateOne(filter, value)
 }
 
+const qsysFindOneAndUpdate = async (filter, value) => {
+  return await Qsys.findOneAndUpdate(filter, value, { new: true })
+}
+
 const qsysFindByIdUpdate = async (id, value) => {
   return await Qsys.findByIdAndUpdate(id, { ...value })
 }
@@ -45,6 +49,7 @@ export {
   qsysMake,
   qsysFind,
   qsysUpdate,
+  qsysFindOneAndUpdate,
   qsysFindByIdUpdate,
   qsysRemovebyId,
   qsysExists,
